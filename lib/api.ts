@@ -1,107 +1,70 @@
-import { Transaction, User, ApiResponse, PaginatedResponse } from './types';
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
+import Cookies from 'js-cookie';
+import { decryptToken } from './utils';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
-class ApiService {
-  private getAuthHeaders() {
-    const token = this.getToken();
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
+// Create axios instance
+const api: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+});
+
+// Request interceptor - attach auth token from cookie
+api.interceptors.request.use(
+  async (config: InternalAxiosRequestConfig) => {
+    try {
+      const encryptedToken = Cookies.get('auth-token');
+      if (encryptedToken && config.headers) {
+        // Decrypt token before sending
+        const token = await decryptToken(encryptedToken);
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (e) {
+      // running on server or cookies not available
+    }
+
+    return config;
+  },
+  (error: any) => Promise.reject(error)
+);
+
+// Response interceptor - handle errors and redirect on 401
+api.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { 
+      _retry?: boolean; 
+      _retryCount?: number; 
     };
-  }
 
-  private getToken(): string | null {
-    if (typeof document === 'undefined') return null;
-    
-    const cookies = document.cookie.split(';');
-    const authCookie = cookies.find(cookie => cookie.trim().startsWith('auth-token='));
-    return authCookie ? authCookie.split('=')[1] : null;
-  }
+    // Network or CORS errors: retry with exponential backoff
+    const shouldRetryNetwork = !error.response && (!originalRequest._retryCount || originalRequest._retryCount < 2);
+    if (shouldRetryNetwork && originalRequest) {
+      originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
+      const backoff = 300 * Math.pow(2, originalRequest._retryCount - 1);
+      await new Promise((resolve) => setTimeout(resolve, backoff));
+      return api(originalRequest);
+    }
 
-  // Users API
-  async getUsers(page = 1, limit = 10): Promise<PaginatedResponse<User>> {
-    const response = await fetch(`${API_BASE_URL}/users?page=${page}&limit=${limit}`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
+    // Handle 401 errors - redirect to login
+    if (error.response?.status === 401) {
+      // Clear token and redirect to login
+      Cookies.remove('auth-token');
+      
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      
+      return Promise.reject(error);
+    }
 
-  async getUser(id: string): Promise<ApiResponse<User>> {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
+    return Promise.reject(error);
   }
+);
 
-  async updateUser(id: string, data: Partial<User>): Promise<ApiResponse<User>> {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-      method: 'PUT',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(data),
-    });
-    return response.json();
-  }
-
-  async deleteUser(id: string): Promise<ApiResponse<null>> {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-      method: 'DELETE',
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
-
-  // Transactions API
-  async getTransactions(page = 1, limit = 10): Promise<PaginatedResponse<Transaction>> {
-    const response = await fetch(`${API_BASE_URL}/transactions?page=${page}&limit=${limit}`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
-
-  async getTransaction(id: string): Promise<ApiResponse<Transaction>> {
-    const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
-
-  // Analytics API
-  async getDashboardStats(): Promise<ApiResponse<{
-    totalRevenue: number;
-    activeUsers: number;
-    totalTransactions: number;
-    pendingIssues: number;
-  }>> {
-    const response = await fetch(`${API_BASE_URL}/analytics/dashboard`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
-
-  async getRevenueChart(period: '7d' | '30d' | '90d' = '30d'): Promise<ApiResponse<any[]>> {
-    const response = await fetch(`${API_BASE_URL}/analytics/revenue?period=${period}`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
-
-  // Reports API
-  async generateReport(type: string, params: Record<string, any>): Promise<ApiResponse<{ downloadUrl: string }>> {
-    const response = await fetch(`${API_BASE_URL}/reports/generate`, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ type, params }),
-    });
-    return response.json();
-  }
-
-  async getReports(): Promise<ApiResponse<any[]>> {
-    const response = await fetch(`${API_BASE_URL}/reports`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
-}
-
-export const apiService = new ApiService();
+export default api;

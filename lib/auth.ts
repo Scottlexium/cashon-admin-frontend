@@ -1,47 +1,47 @@
-import { LoginCredentials, User, ApiResponse } from './types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+import { LoginCredentials, User, ApiResponse, LoginResponse } from './types';
+import api from './api';
+import Cookies from 'js-cookie';
 
 class AuthService {
-  async login(credentials: LoginCredentials): Promise<ApiResponse<{ user: User; token: string }>> {
+  async login(credentials: LoginCredentials): Promise<ApiResponse<LoginResponse>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
+      const response = await api.post<ApiResponse<LoginResponse>>('/login', credentials);
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (data.data?.token) {
         // Store auth token in cookie
-        document.cookie = `auth-token=${data.data.token}; path=/; secure; samesite=strict`;
-        document.cookie = `user-role=${data.data.user.role}; path=/; secure; samesite=strict`;
-        return data;
-      } else {
-        throw new Error(data.message || 'Login failed');
+        Cookies.set('auth-token', data.data.token, { 
+          path: '/', 
+          secure: process.env.NODE_ENV === 'production', 
+          sameSite: 'strict',
+          expires: 7 
+        });
+        
+        if (data.data.role) {
+          Cookies.set('user-role', data.data.role, { 
+            path: '/', 
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'strict',
+            expires: 7 
+          });
+        }
       }
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Login failed');
+
+      return data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || error.message || 'Login failed');
     }
   }
 
   async logout(): Promise<void> {
     try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
-        },
-      });
+      await api.post('/logout');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       // Clear cookies
-      document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-      document.cookie = 'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+      Cookies.remove('auth-token');
+      Cookies.remove('user-role');
     }
   }
 
@@ -50,17 +50,8 @@ class AuthService {
       const token = this.getToken();
       if (!token) return null;
 
-      const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.data.user;
-      }
-      return null;
+      const response = await api.get<ApiResponse<User>>('/profile');
+      return response.data.data;
     } catch (error) {
       console.error('Get current user error:', error);
       return null;
@@ -68,11 +59,7 @@ class AuthService {
   }
 
   getToken(): string | null {
-    if (typeof document === 'undefined') return null;
-    
-    const cookies = document.cookie.split(';');
-    const authCookie = cookies.find(cookie => cookie.trim().startsWith('auth-token='));
-    return authCookie ? authCookie.split('=')[1] : null;
+    return Cookies.get('auth-token') || null;
   }
 
   isAuthenticated(): boolean {

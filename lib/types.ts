@@ -1,11 +1,22 @@
-export interface User {
-  id: string;
-  email: string;
+export interface Department {
+  id: number;
   name: string;
-  role: 'admin' | 'user' | 'moderator';
-  avatar?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  role: string;
+  status: string;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  phone?: string;
+  role: 'admin' | 'manager' | 'user' | 'moderator';
+  status: 'active' | 'inactive';
+  has_temp_password: 0 | 1;
+  login_time?: string;
+  departments?: Department[];
+  token?: string;
 }
 
 export interface AuthState {
@@ -17,6 +28,17 @@ export interface AuthState {
 export interface LoginCredentials {
   email: string;
   password: string;
+}
+
+export interface LoginResponse {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  role: 'admin' | 'manager' | 'user' | 'moderator';
+  status: 'active' | 'inactive';
+  has_temp_password: 0 | 1;
+  token: string;
 }
 
 export interface Transaction {
@@ -32,10 +54,9 @@ export interface Transaction {
 }
 
 export interface ApiResponse<T> {
-  data: T;
+  status: boolean;
   message: string;
-  success: boolean;
-  error?: string;
+  data: T;
 }
 
 export interface PaginatedResponse<T> {
