@@ -39,10 +39,10 @@ export function Header({}: HeaderProps) {
   const { title, icon: Icon } = getPageInfo(pathname);
 
   return (
-    <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-8">
+    <div className="flex h-16 shrink-0 items-center border-b border-[#3131354A] bg-transparent px-4 sm:px-6 lg:px-8">
       <div className="flex items-center gap-x-3">
-        <Icon className="h-6 w-6 text-gray-600" />
-        <h1 className="text-xl font-semibold text-gray-900">
+        <Icon className="h-6 w-6 text-[#A2A2A7]" />
+        <h1 className="text-lg font-medium text-[#A2A2A7]">
           {title}
         </h1>
       </div>

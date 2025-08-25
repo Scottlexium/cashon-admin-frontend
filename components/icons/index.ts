@@ -1,6 +1,3 @@
-export { PowerIcon } from './PowerIcon';
-
-// Re-export all icons from the main icons file
 export {
   LockIcon,
   MailIcon,
