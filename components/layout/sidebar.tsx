@@ -23,25 +23,26 @@ export function Sidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col bg-[#151517]">
-      {/* Logo/Brand */}
-      <div className="flex h-16 shrink-0 items-center px-6">
-        <div className="flex items-center space-x-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#00FFB3]">
-            <span className="text-sm font-bold text-white">C</span>
-          </div>
-          <span className="text-xl font-semibold text-white">CashOn</span>
+      <div className='flex items-center gap-2 px-4 py-2 justify-between bg-[#1F20238F] w-[90%] rounded-[11px] mx-auto mt-4'>
+        <div className='space-y-2'>
+          <p className="text-sm font-semibold text-white">{user?.name}</p>
+          <p className="text-xs font-medium text-[#A2A2A7]">{user?.email}</p>
         </div>
+        <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1.00005 1C1.00005 1 7 5.4189 7 7C7 8.5812 1 13 1 13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
       </div>
 
+
       {/* Navigation */}
-      <nav className="flex flex-1 flex-col px-4 pb-4">
+      <nav className="flex flex-1 flex-col px-4 pb-4 mt-5">
         <ul role="list" className="flex flex-1 flex-col gap-y-1">
           {navigation.map((item) => {
             // Special handling for dashboard to match both /dashboard and /dashboard/overview, just minor stuff to make sure overview is dashboard index
-            const isActive = item.href === '/dashboard' 
+            const isActive = item.href === '/dashboard'
               ? (pathname === '/dashboard' || pathname === '/dashboard/overview' || pathname.startsWith('/dashboard/overview/'))
               : pathname === item.href || pathname.startsWith(item.href + '/');
-            
+
             return (
               <li key={item.name}>
                 <Link
@@ -49,8 +50,8 @@ export function Sidebar() {
                   className={cn(
                     'group flex gap-x-3 rounded-md p-3 text-sm font-medium leading-6 transition-colors',
                     isActive
-                      ? 'bg-gray-800 text-[#00FFB3]'
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                      ? 'bg-[#1F2023] text-white'
+                      : 'text-[#A2A2A7] hover:bg-[#1F2023] hover:text-white'
                   )}
                 >
                   <item.icon
@@ -69,34 +70,19 @@ export function Sidebar() {
 
         {/* User Profile & Logout */}
         <div className="border-t border-gray-700 pt-4">
-          {user && (
-            <div className="mb-3 px-3">
-              <div className="flex items-center space-x-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00FFB3]">
-                  <span className="text-sm font-medium text-white">
-                    {user.name?.charAt(0).toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{user.name}</p>
-                  <p className="text-xs text-gray-400 truncate">{user.role}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          
+
           <button
             onClick={handleLogout}
             className="group flex w-full gap-x-3 rounded-md p-3 text-sm font-medium leading-6 text-gray-300 transition-colors hover:bg-gray-800 hover:text-white"
           >
             <LogoutIcon
-              className="h-5 w-5 shrink-0 text-gray-400 group-hover:text-white"
+              className="h-5 w-5 shrink-0 text-red-400 group-hover:text-white"
               aria-hidden="true"
             />
             Logout
           </button>
         </div>
       </nav>
-    </div>
+    </div >
   );
 }

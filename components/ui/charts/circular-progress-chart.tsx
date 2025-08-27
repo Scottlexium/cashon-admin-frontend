@@ -19,6 +19,12 @@ export interface CircularProgressChartProps {
     height?: number;
     radius?: number;
     strokeWidth?: number;
+    // Spacing and inner arc props
+    segmentSpacing?: number;
+    showInnerArc?: boolean;
+    innerArcOffset?: number;
+    innerArcStrokeWidth?: number;
+    innerArcOpacity?: number;
 }
 
 export function CircularProgressChart({
@@ -31,7 +37,13 @@ export function CircularProgressChart({
     width = 400,
     height = 250,
     radius = 80,
-    strokeWidth = 8
+    strokeWidth = 8,
+    // Spacing and inner arc props
+    segmentSpacing = 0.08,
+    showInnerArc = true,
+    innerArcOffset = 1.2,
+    innerArcStrokeWidth = 1.5,
+    innerArcOpacity = 0.8
 }: CircularProgressChartProps) {
     const svgRef = useRef<SVGSVGElement>(null);
 
@@ -131,7 +143,7 @@ export function CircularProgressChart({
             .value(d => d.value)
             .startAngle(-Math.PI * 0.75)
             .endAngle(Math.PI * 0.75)
-            .padAngle(0.08) // Small gap between segments
+            .padAngle(segmentSpacing) // Customizable gap between segments
             .sort(null);
 
         // Create arc generator for strokes (not filled)
@@ -173,24 +185,26 @@ export function CircularProgressChart({
                 };
             });
 
-        // Add inner track line AFTER segments (so it renders on top)
-        const innerTrackArc = d3.arc()
-            .innerRadius(radius - strokeWidth * 1.2)
-            .outerRadius(radius - strokeWidth * 1.2)
-            .startAngle(-Math.PI * 0.75)
-            .endAngle(Math.PI * 0.75)
-            .cornerRadius(0);
+        // Add inner track arc AFTER segments (so it renders on top)
+        if (showInnerArc) {
+            const innerTrackArc = d3.arc()
+                .innerRadius(radius - strokeWidth * innerArcOffset)
+                .outerRadius(radius - strokeWidth * innerArcOffset)
+                .startAngle(-Math.PI * 0.75)
+                .endAngle(Math.PI * 0.75)
+                .cornerRadius(0);
 
-        chartGroup
-            .append('path')
-            .attr('d', innerTrackArc as any)
-            .attr('fill', 'none')
-            .attr('stroke', '#404045') // Subtle gray inner track
-            .attr('stroke-width', 1.5)
-            .attr('stroke-linecap', 'round')
-            .attr('opacity', 0.8);
+            chartGroup
+                .append('path')
+                .attr('d', innerTrackArc as any)
+                .attr('fill', 'none')
+                .attr('stroke', '#404045') // Subtle gray inner track
+                .attr('stroke-width', innerArcStrokeWidth)
+                .attr('stroke-linecap', 'round')
+                .attr('opacity', innerArcOpacity);
+        }
 
-    }, [segments, width, height, radius, strokeWidth, totalValue, currency, locale]);
+    }, [segments, width, height, radius, strokeWidth, totalValue, currency, locale, segmentSpacing, showInnerArc, innerArcOffset, innerArcStrokeWidth, innerArcOpacity]);
 
     return (
         <div className={`flex flex-col items-center ${className}`}>
@@ -220,40 +234,44 @@ export function CircularProgressChart({
             </div>
 
             {/* Grid Image - Separate section */}
-            <div className="mt-4 mb-4">
-                <div 
+            <div className="-mt-10">
+                <div
                     className="bg-contain bg-center bg-no-repeat opacity-60"
-                    style={{ 
-                        backgroundImage: 'url(/Grid.svg)',
-                        width: `${radius * 1.8}px`,
-                        height: `${radius * 0.7}px`,
-                        filter: 'brightness(0.6)'
+                    style={{
+                        backgroundImage: 'url(/chart-grid.svg)',
+                        width: "600px",
+                        height: "80px",
+                        // width: `${radius * 1.8}px`,
+                        // height: `${radius * 0.7}px`,
+                        // filter: 'brightness(0.6)'
                     }}
                 ></div>
             </div>
 
             {/* Labels Grid */}
-            <div className="grid grid-cols-3 gap-8 w-full max-w-md">
+            <div className="grid grid-cols-3 gap-8 w-full max-w-md -mt-10">
                 {segments.map((segment, index) => (
-                    <div key={index} className="text-center">
+                    <div key={index} className="text-left">
                         <div className="flex items-center justify-center gap-2 mb-2">
-                            <div 
-                                className="w-1 h-6 rounded-full"
-                                style={{ 
-                                    background: typeof segment.color === 'object' 
-                                        ? `linear-gradient(${
-                                            segment.color.direction === 'vertical' ? 'to bottom' :
+                            <div
+                                className="w-1 h-8 rounded-full"
+                                style={{
+                                    background: typeof segment.color === 'object'
+                                        ? `linear-gradient(${segment.color.direction === 'vertical' ? 'to bottom' :
                                             segment.color.direction === 'diagonal' ? 'to bottom right' :
-                                            'to right'
+                                                'to right'
                                         }, ${segment.color.from}, ${segment.color.to})`
                                         : segment.color
                                 }}
                             ></div>
-                            <p className="text-sm text-[#8C8C93]">{segment.label}</p>
+                            <div>
+                                <p className="text-xs text-[#8C8C93]">{segment.label}</p>
+                                <p className="text-sm font-bold text-[#DEDEE3]">
+                                    {segment.value.toLocaleString()}
+                                </p>
+                            </div>
                         </div>
-                        <p className="text-xl font-bold text-[#DEDEE3]">
-                            {segment.value.toLocaleString()}
-                        </p>
+
                     </div>
                 ))}
             </div>

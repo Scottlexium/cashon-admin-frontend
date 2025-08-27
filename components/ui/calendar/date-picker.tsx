@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button/button';
 
 export type DateRange = {
   from: Date;
@@ -21,6 +22,7 @@ interface DatePickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const RELATIVE_RANGES: RelativeRange[] = [
@@ -41,7 +43,8 @@ export function DatePicker({
   onChange, 
   placeholder = 'Select date range...', 
   disabled = false,
-  className 
+  className,
+  size = 'md'
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -55,6 +58,13 @@ export function DatePicker({
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Size configurations - only affects padding and text size, not styling
+  const sizeClasses = {
+    sm: 'px-3 py-2 text-sm',
+    md: 'px-4 py-3 text-base',
+    lg: 'px-5 py-4 text-lg',
+  };
 
   // Check if we're on mobile
   useEffect(() => {
@@ -244,32 +254,34 @@ export function DatePicker({
   return (
     <div className={cn("relative", className)} ref={dropdownRef}>
       {/* Trigger Button */}
-      <button
+      <Button
         ref={triggerRef}
         onClick={toggleDropdown}
         disabled={disabled}
+        variant="ghost"
+        size={size}
         className={cn(
-          'flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-md border transition-all duration-300 ease-out min-w-0',
-          'bg-[#303033] border-[#313135] text-[#8C8C93] hover:border-[#00FFB3] hover:text-[#DEDEE3] hover:scale-105 active:scale-95',
-          'transform-gpu will-change-transform',
-          disabled && 'opacity-50 cursor-not-allowed',
-          (isOpen || shouldRender) && 'border-[#00FFB3] text-[#DEDEE3] scale-105 shadow-lg shadow-[#00FFB3]/20'
+          'w-fit justify-between bg-[#3A3A3D] border border-[#4A4A4F] text-[#DEDEE3]',
+          'hover:bg-[#4A4A4F] focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-[#4A4A4F]',
+          'min-w-0 font-medium',
+          disabled && 'opacity-50 cursor-not-allowed'
         )}
+        style={{ borderRadius: '0.4375rem' }}
       >
-        <span className="truncate min-w-0">{formatDisplayValue()}</span>
+        <span className="truncate min-w-0 text-left">{formatDisplayValue()}</span>
         <svg 
           width="14" 
           height="14" 
           viewBox="0 0 24 24" 
           fill="none" 
           className={cn(
-            'transition-all duration-300 flex-shrink-0 transform-gpu',
-            (isOpen || shouldRender) && 'rotate-180 text-[#00FFB3]'
+            'transition-all duration-300 flex-shrink-0 ml-2',
+            (isOpen || shouldRender) && 'rotate-180'
           )}
         >
           <polyline points="6,9 12,15 18,9" stroke="currentColor" strokeWidth="2" fill="none"/>
         </svg>
-      </button>
+      </Button>
 
       {/* Dropdown / Bottom Sheet */}
       {shouldRender && (
@@ -313,28 +325,28 @@ export function DatePicker({
                 <div className="px-4 pb-safe max-h-[80vh] overflow-y-auto">
                   {/* Tab Navigation */}
                   <div className="flex mb-4 bg-[#2C2C2E] rounded-lg p-1">
-                    <button
+                    <Button
                       onClick={() => setActiveTab('relative')}
+                      variant={activeTab === 'relative' ? 'primary' : 'ghost'}
+                      size="sm"
                       className={cn(
-                        'flex-1 px-3 py-2 text-sm rounded-md transition-all duration-300 ease-out transform-gpu',
-                        activeTab === 'relative' 
-                          ? 'bg-[#00FFB3] text-black font-medium scale-105 shadow-lg' 
-                          : 'text-[#8C8C93] hover:text-[#DEDEE3] hover:bg-[#38383A] hover:scale-102'
+                        'flex-1 transition-all duration-300 ease-out transform-gpu',
+                        activeTab === 'relative' ? 'scale-105 shadow-lg' : 'hover:scale-102'
                       )}
                     >
                       Quick Ranges
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => setActiveTab('absolute')}
+                      variant={activeTab === 'absolute' ? 'primary' : 'ghost'}
+                      size="sm"
                       className={cn(
-                        'flex-1 px-3 py-2 text-sm rounded-md transition-all duration-300 ease-out transform-gpu',
-                        activeTab === 'absolute' 
-                          ? 'bg-[#00FFB3] text-black font-medium scale-105 shadow-lg' 
-                          : 'text-[#8C8C93] hover:text-[#DEDEE3] hover:bg-[#38383A] hover:scale-102'
+                        'flex-1 transition-all duration-300 ease-out transform-gpu',
+                        activeTab === 'absolute' ? 'scale-105 shadow-lg' : 'hover:scale-102'
                       )}
                     >
                       Custom Range
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Tab Content */}
@@ -438,18 +450,15 @@ export function DatePicker({
                       )}
 
                       {/* Apply Button */}
-                      <button
+                      <Button
                         onClick={handleAbsoluteDateSelect}
                         disabled={!selectedFromDate || !selectedToDate}
-                        className={cn(
-                          'w-full py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 transform-gpu',
-                          selectedFromDate && selectedToDate
-                            ? 'bg-[#00FFB3] text-black hover:bg-[#00E5A3] shadow-lg hover:shadow-xl'
-                            : 'bg-[#2C2C2E] text-[#8C8C93] cursor-not-allowed'
-                        )}
+                        variant={selectedFromDate && selectedToDate ? 'primary' : 'secondary'}
+                        size="md"
+                        className="w-full transition-all duration-300 ease-out hover:scale-105 active:scale-95 transform-gpu"
                       >
                         Apply Range
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -473,28 +482,28 @@ export function DatePicker({
             >
               {/* Tab Navigation */}
               <div className="flex mb-4 bg-[#2C2C2E] rounded-lg p-1">
-                <button
+                <Button
                   onClick={() => setActiveTab('relative')}
+                  variant={activeTab === 'relative' ? 'primary' : 'ghost'}
+                  size="sm"
                   className={cn(
-                    'flex-1 px-3 py-2 text-sm rounded-md transition-all duration-300 ease-out transform-gpu',
-                    activeTab === 'relative' 
-                      ? 'bg-[#00FFB3] text-black font-medium scale-105 shadow-lg' 
-                      : 'text-[#8C8C93] hover:text-[#DEDEE3] hover:bg-[#38383A] hover:scale-102'
+                    'flex-1 transition-all duration-300 ease-out transform-gpu',
+                    activeTab === 'relative' ? 'scale-105 shadow-lg' : 'hover:scale-102'
                   )}
                 >
                   Quick Ranges
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setActiveTab('absolute')}
+                  variant={activeTab === 'absolute' ? 'primary' : 'ghost'}
+                  size="sm"
                   className={cn(
-                    'flex-1 px-3 py-2 text-sm rounded-md transition-all duration-300 ease-out transform-gpu',
-                    activeTab === 'absolute' 
-                      ? 'bg-[#00FFB3] text-black font-medium scale-105 shadow-lg' 
-                      : 'text-[#8C8C93] hover:text-[#DEDEE3] hover:bg-[#38383A] hover:scale-102'
+                    'flex-1 transition-all duration-300 ease-out transform-gpu',
+                    activeTab === 'absolute' ? 'scale-105 shadow-lg' : 'hover:scale-102'
                   )}
                 >
                   Custom Range
-                </button>
+                </Button>
               </div>
 
               {/* Tab Content */}
@@ -592,18 +601,15 @@ export function DatePicker({
                   )}
 
                   {/* Apply Button */}
-                  <button
+                  <Button
                     onClick={handleAbsoluteDateSelect}
                     disabled={!selectedFromDate || !selectedToDate}
-                    className={cn(
-                      'w-full py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 transform-gpu',
-                      selectedFromDate && selectedToDate
-                        ? 'bg-[#00FFB3] text-black hover:bg-[#00E5A3] shadow-lg hover:shadow-xl'
-                        : 'bg-[#2C2C2E] text-[#8C8C93] cursor-not-allowed'
-                    )}
+                    variant={selectedFromDate && selectedToDate ? 'primary' : 'secondary'}
+                    size="md"
+                    className="w-full transition-all duration-300 ease-out hover:scale-105 active:scale-95 transform-gpu"
                   >
                     Apply Range
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

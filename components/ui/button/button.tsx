@@ -1,20 +1,21 @@
+import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'addon';
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'addon' | 'filled';
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
   icon?: React.ReactNode;
 }
 
-export function Button({ 
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ 
   variant = 'primary', 
   size = 'md', 
   className, 
   children, 
   icon,
   ...props 
-}: ButtonProps) {
+}, ref) => {
   const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variants = {
@@ -24,6 +25,7 @@ export function Button({
     ghost: 'text-text-secondary hover:text-text-primary hover:bg-surface-secondary focus:ring-primary/50 rounded-md',
     danger: 'bg-error text-white hover:bg-error/90 focus:ring-error/50 rounded-lg shadow-cashon-sm',
     addon: 'bg-surface border border-border-light text-text-primary hover:bg-surface-secondary focus:ring-primary/50 rounded-md shadow-cashon-sm',
+    filled: 'bg-[#4A4A4F] text-[#DEDEE3] hover:bg-[#5A5A5F] focus:outline-none rounded-lg border-none shadow-sm',
   };
 
   const sizes = {
@@ -34,6 +36,7 @@ export function Button({
 
   return (
     <button
+      ref={ref}
       className={cn(baseClasses, variants[variant], sizes[size], className)}
       {...props}
     >
@@ -41,4 +44,6 @@ export function Button({
       {children}
     </button>
   );
-}
+});
+
+Button.displayName = 'Button';
