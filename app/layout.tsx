@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "CashOn Admin Dashboard",
-  description: "Administrative dashboard for CashOn financial platform",
+  description: "Cashon Admin Dashboard",
 };
 
 export default function RootLayout({
