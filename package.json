@@ -10,9 +10,11 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@types/d3": "^7.4.3",
     "@types/js-cookie": "^3.0.6",
     "axios": "^1.11.0",
     "clsx": "^2.1.1",
+    "d3": "^7.9.0",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.541.0",
     "next": "15.5.0",

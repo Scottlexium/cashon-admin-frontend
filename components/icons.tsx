@@ -63,9 +63,9 @@ export const UserIcon = ({ className, ...props }: IconProps) => (
 UserIcon.displayName = 'UserIcon';
 
 export const OverviewIcon = ({ className, ...props }: IconProps) => (
-  <svg className={className} width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-    <path d="M15.176 4.23393C14.4363 3.73174 13.633 3.34444 12.7922 3.08018C11.7315 2.74677 11.2011 2.58007 10.6422 2.99887C10.0833 3.41769 10.0833 4.09796 10.0833 5.45849V9.63087C10.0833 10.7889 10.0833 11.3679 10.2978 11.887C10.5125 12.4062 10.9194 12.8114 11.7333 13.622L14.6657 16.5427C15.6218 17.495 16.1 17.9712 16.7856 17.8588C17.4712 17.7464 17.7252 17.2448 18.2334 16.2417C18.6223 15.4742 18.9063 14.6515 19.0738 13.7957C19.4275 11.9889 19.246 10.1161 18.5522 8.41411C17.8583 6.71213 16.6834 5.2574 15.176 4.23393Z" fill="#00FFB3" stroke="#00FFB3" strokeWidth="1.375" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12.8333 18.7183C11.9841 19.062 11.0558 19.2513 10.0833 19.2513C6.03324 19.2513 2.75 15.9681 2.75 11.918C2.75 8.76744 4.73675 6.08093 7.52572 5.04297" stroke="#00FFB3" strokeWidth="1.375" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+    <path d="M15.176 4.23393C14.4363 3.73174 13.633 3.34444 12.7922 3.08018C11.7315 2.74677 11.2011 2.58007 10.6422 2.99887C10.0833 3.41769 10.0833 4.09796 10.0833 5.45849V9.63087C10.0833 10.7889 10.0833 11.3679 10.2978 11.887C10.5125 12.4062 10.9194 12.8114 11.7333 13.622L14.6657 16.5427C15.6218 17.495 16.1 17.9712 16.7856 17.8588C17.4712 17.7464 17.7252 17.2448 18.2334 16.2417C18.6223 15.4742 18.9063 14.6515 19.0738 13.7957C19.4275 11.9889 19.246 10.1161 18.5522 8.41411C17.8583 6.71213 16.6834 5.2574 15.176 4.23393Z" fill="currentColor" stroke="currentColor" strokeWidth="1.375" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12.8333 18.7183C11.9841 19.062 11.0558 19.2513 10.0833 19.2513C6.03324 19.2513 2.75 15.9681 2.75 11.918C2.75 8.76744 4.73675 6.08093 7.52572 5.04297" stroke="currentColor" strokeWidth="1.375" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 OverviewIcon.displayName = 'OverviewIcon';
@@ -141,6 +141,76 @@ export const LogoutIcon = ({ className, ...props }: IconProps) => (
 );
 LogoutIcon.displayName = 'LogoutIcon';
 
+// Stats Card Icons
+export const DepositIcon = ({ className, ...props }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.467-.22-2.121-.659-1.172-.879-1.172-2.303 0-3.182s3.07-.879 4.242 0L15 9m-3 0V6M12 18v2" />
+  </svg>
+);
+DepositIcon.displayName = 'DepositIcon';
+
+export const WithdrawalIcon = ({ className, ...props }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+  </svg>
+);
+WithdrawalIcon.displayName = 'WithdrawalIcon';
+
+export const ActiveUsersIcon = ({ className, ...props }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+  </svg>
+);
+ActiveUsersIcon.displayName = 'ActiveUsersIcon';
+
+export const RevenueIcon = ({ className, ...props }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0-1-3m1 3v-3h-7.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+  </svg>
+);
+RevenueIcon.displayName = 'RevenueIcon';
+
+export const WalletIcon = ({ className, ...props }: IconProps) => (
+  <svg className={className} width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path d="M15.2794 6.27005V10.3471C15.2794 12.7855 13.886 13.8305 11.796 13.8305H4.83727C4.48102 13.8305 4.14061 13.7988 3.82394 13.7276C3.62602 13.6959 3.43603 13.6405 3.26186 13.5772C2.07436 13.1338 1.35394 12.1046 1.35394 10.3471V6.27005C1.35394 3.83171 2.74727 2.78674 4.83727 2.78674H11.796C13.5694 2.78674 14.8439 3.53882 15.1844 5.25674C15.2398 5.57341 15.2794 5.89796 15.2794 6.27005Z" stroke="currentColor" strokeWidth="1.1875" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17.6548 8.64502V12.7221C17.6548 15.1605 16.2615 16.2054 14.1715 16.2054H7.21273C6.6269 16.2054 6.09649 16.1263 5.63733 15.9521C4.69524 15.6038 4.05399 14.8834 3.8244 13.7276C4.14107 13.7988 4.48148 13.8304 4.83773 13.8304H11.7965C13.8865 13.8304 15.2798 12.7855 15.2798 10.3471V6.27002C15.2798 5.89794 15.2482 5.56546 15.1848 5.25671C16.689 5.57338 17.6548 6.63419 17.6548 8.64502Z" stroke="currentColor" strokeWidth="1.1875" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8.31123 10.4024C9.46551 10.4024 10.4012 9.46665 10.4012 8.31238C10.4012 7.1581 9.46551 6.22237 8.31123 6.22237C7.15696 6.22237 6.22122 7.1581 6.22122 8.31238C6.22122 9.46665 7.15696 10.4024 8.31123 10.4024Z" stroke="currentColor" strokeWidth="1.1875" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3.784 6.57082V10.0542" stroke="currentColor" strokeWidth="1.1875" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12.842 6.57109V10.0544" stroke="currentColor" strokeWidth="1.1875" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+WalletIcon.displayName = 'WalletIcon';
+
+export const LayersIcon = ({ className, ...props }: IconProps) => (
+  <svg className={className} width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path d="M10.2996 2.31162L14.9705 4.38579C16.3163 4.97954 16.3163 5.96121 14.9705 6.55496L10.2996 8.62912C9.7692 8.86662 8.89837 8.86662 8.36795 8.62912L3.69712 6.55496C2.35129 5.96121 2.35129 4.97954 3.69712 4.38579L8.36795 2.31162C8.89837 2.07412 9.7692 2.07412 10.2996 2.31162Z" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M2.375 8.70834C2.375 9.37334 2.87375 10.1413 3.48333 10.4104L8.85875 12.8013C9.27042 12.9833 9.7375 12.9833 10.1413 12.8013L15.5167 10.4104C16.1263 10.1413 16.625 9.37334 16.625 8.70834" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M2.375 12.6667C2.375 13.4029 2.81042 14.0679 3.48333 14.3687L8.85875 16.7596C9.27042 16.9417 9.7375 16.9417 10.1413 16.7596L15.5167 14.3687C16.1896 14.0679 16.625 13.4029 16.625 12.6667" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+LayersIcon.displayName = 'LayersIcon';
+
+export const DatabaseIcon = ({ className, ...props }: IconProps) => (
+  <svg className={className} width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path d="M14.6458 10.0146V12.9438C14.6458 15.4138 12.342 17.4167 9.49996 17.4167C6.65788 17.4167 4.35413 15.4138 4.35413 12.9438V10.0146C4.35413 12.4846 6.65788 14.25 9.49996 14.25C12.342 14.25 14.6458 12.4846 14.6458 10.0146Z" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M14.6458 6.05625C14.6458 6.77666 14.4479 7.44166 14.0995 8.01166C13.2525 9.40499 11.5108 10.2917 9.49996 10.2917C7.48913 10.2917 5.74746 9.40499 4.90038 8.01166C4.55204 7.44166 4.35413 6.77666 4.35413 6.05625C4.35413 4.82125 4.93204 3.70499 5.85829 2.89749C6.79245 2.08208 8.07496 1.58333 9.49996 1.58333C10.925 1.58333 12.2075 2.08208 13.1416 2.88958C14.0679 3.705 14.6458 4.82125 14.6458 6.05625Z" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M14.6458 6.05625V10.0146C14.6458 12.4846 12.342 14.25 9.49996 14.25C6.65788 14.25 4.35413 12.4846 4.35413 10.0146V6.05625C4.35413 3.58625 6.65788 1.58333 9.49996 1.58333C10.925 1.58333 12.2075 2.08208 13.1416 2.88958C14.0679 3.705 14.6458 4.82125 14.6458 6.05625Z" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+DatabaseIcon.displayName = 'DatabaseIcon';
+
+export const ReceiptIcon = ({ className, ...props }: IconProps) => (
+  <svg className={className} width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path d="M9.89582 17.4168H3.22999C2.31165 17.4168 1.55957 16.6805 1.55957 15.778V4.02967C1.55957 1.95551 3.10332 1.01342 4.9954 1.93967L8.5104 3.6655C9.2704 4.03759 9.89582 5.02717 9.89582 5.86634V17.4168Z" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17.393 11.9226V14.9151C17.393 16.6251 16.6013 17.4168 14.8913 17.4168H9.89587V8.2493L10.268 8.32847L13.8305 9.12805L15.4375 9.4843C16.4825 9.71388 17.3375 10.2522 17.385 11.7722C17.393 11.8197 17.393 11.8672 17.393 11.9226Z" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M4.35413 7.12509H7.10121" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M4.35413 10.2917H7.10121" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M13.8304 9.12801V11.6772C13.8304 12.6588 13.0309 13.4584 12.0492 13.4584C11.0675 13.4584 10.2679 12.6588 10.2679 11.6772V8.32843L13.8304 9.12801Z" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M17.385 11.7722C17.3375 12.7064 16.5617 13.4585 15.6117 13.4585C14.63 13.4585 13.8304 12.6589 13.8304 11.6772V9.12805L15.4375 9.4843C16.4825 9.71388 17.3375 10.2522 17.385 11.7722Z" stroke="currentColor" strokeWidth="1.1875" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+ReceiptIcon.displayName = 'ReceiptIcon';
+
 const Icons = {
   PowerIcon,
   LockIcon,
@@ -157,6 +227,15 @@ const Icons = {
   DocumentTextIcon,
   Cog6ToothIcon,
   LogoutIcon,
+  OverviewIcon,
+  DepositIcon,
+  WithdrawalIcon,
+  ActiveUsersIcon,
+  RevenueIcon,
+  WalletIcon,
+  LayersIcon,
+  DatabaseIcon,
+  ReceiptIcon,
 };
 
 export default Icons;

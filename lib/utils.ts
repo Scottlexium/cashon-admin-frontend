@@ -5,11 +5,49 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(amount: number, currency = 'USD', locale = 'en-US'): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
+}
+
+export function formatNumber(value: number, locale = 'en-US'): string {
+  return new Intl.NumberFormat(locale).format(value);
+}
+
+export function formatPercentage(value: number): string {
+  return `${value}%`;
+}
+
+export function formatValue(
+  value: string | number, 
+  format?: 'currency' | 'number' | 'percentage', 
+  prefix?: string, 
+  suffix?: string,
+  currency?: string,
+  locale?: string
+): string {
+  const numValue = typeof value === 'string' ? parseFloat(value.replace(/[^\d.-]/g, '')) : value;
+  
+  // Generic currency formatting
+  if (format === 'currency') {
+    return formatCurrency(numValue, currency || 'USD', locale || 'en-US');
+  }
+  
+  if (format === 'percentage') {
+    return formatPercentage(numValue);
+  }
+  
+  if (format === 'number') {
+    return formatNumber(numValue, locale || 'en-US');
+  }
+  
+  // Default formatting with prefix/suffix
+  const formattedNum = formatNumber(numValue, locale || 'en-US');
+  return `${prefix || ''}${formattedNum}${suffix || ''}`;
 }
 
 export function formatDate(date: Date | string): string {
