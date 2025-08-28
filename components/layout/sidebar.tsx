@@ -29,7 +29,7 @@ export function Sidebar() {
           <p className="text-xs font-medium text-[#A2A2A7]">{user?.email}</p>
         </div>
         <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M1.00005 1C1.00005 1 7 5.4189 7 7C7 8.5812 1 13 1 13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M1.00005 1C1.00005 1 7 5.4189 7 7C7 8.5812 1 13 1 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
 

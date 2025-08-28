@@ -15,6 +15,7 @@ import {
 import { BarChart } from './bar-chart';
 import { StackedBarChart } from './stacked-bar-chart';
 import { GroupedBarChart } from './grouped-bar-chart';
+import { LineChart } from './line-chart';
 
 export function Chart({
   data,
@@ -28,6 +29,7 @@ export function Chart({
   animation = defaultChartAnimation,
   interactive = true,
   responsive = true,
+  showDataPoints = true, // Default to true
   title,
   subtitle,
   header,
@@ -63,6 +65,7 @@ export function Chart({
     height,
     width,
     interactive,
+    showDataPoints,
     formatters,
     onBarClick,
     onBarHover
@@ -78,6 +81,9 @@ export function Chart({
         return <StackedBarChart {...commonProps} />;
       case 'grouped-bar':
         return <GroupedBarChart {...commonProps} />;
+      case 'line':
+      case 'area':
+        return <LineChart {...commonProps} />;
       default:
         return <BarChart {...commonProps} />;
     }

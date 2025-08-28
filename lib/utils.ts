@@ -24,7 +24,7 @@ export function formatPercentage(value: number): string {
 
 export function formatValue(
   value: string | number, 
-  format?: 'currency' | 'number' | 'percentage', 
+  format?: 'currency' | 'number' | 'percentage' | 'raw', 
   prefix?: string, 
   suffix?: string,
   currency?: string,
@@ -45,8 +45,12 @@ export function formatValue(
     return formatNumber(numValue, locale || 'en-US');
   }
   
-  // Default formatting with prefix/suffix
-  const formattedNum = formatNumber(numValue, locale || 'en-US');
+  if (format === 'raw') {
+    return `${prefix || ''}${numValue}${suffix || ''}`;
+  }
+  
+  // Default formatting - only apply number formatting if locale is provided
+  const formattedNum = locale ? formatNumber(numValue, locale) : numValue.toString();
   return `${prefix || ''}${formattedNum}${suffix || ''}`;
 }
 

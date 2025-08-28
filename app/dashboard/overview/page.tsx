@@ -67,6 +67,36 @@ export default function OverviewPage() {
     },
   ];
 
+  // Chart formatters - defined outside JSX to avoid serialization issues
+  const chartFormatters = {
+    value: (value: number) => {
+      if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+      return `$${value}`;
+    },
+    tooltip: (data: any, field: string) => {
+      const value = data[field];
+      const formatted = value >= 1000 ? `$${(value / 1000).toFixed(1)}K` : `$${value}`;
+      return `${field === 'deposits' ? 'Deposits' : 'Withdrawals'}: ${formatted}`;
+    },
+    legend: (fieldName: string) => {
+      return fieldName === 'deposits' ? 'Deposits' : 'Withdrawals';
+    }
+  };
+
+  // Chart event handlers
+  const handleBarClick = (data: any, field: string) => {
+    console.log('Bar clicked:', data, field);
+  };
+
+  // Table event handlers
+  const handleTransactionClick = (row: any) => {
+    console.log('Transaction clicked:', row);
+  };
+
+  const handleApprovalClick = (row: any) => {
+    console.log('Approval clicked:', row);
+  };
+
   // Generic chart data - can use any field names
   const transactionData = [
     { month: 'Jan', deposits: 85000, withdrawals: 45000, netFlow: 40000 },
@@ -338,23 +368,8 @@ export default function OverviewPage() {
                     style: 'dots'
                   }
                 }}
-                formatters={{
-                  value: (value) => {
-                    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
-                    return `$${value}`;
-                  },
-                  tooltip: (data, field) => {
-                    const value = data[field];
-                    const formatted = value >= 1000 ? `$${(value / 1000).toFixed(1)}K` : `$${value}`;
-                    return `${field === 'deposits' ? 'Deposits' : 'Withdrawals'}: ${formatted}`;
-                  },
-                  legend: (fieldName) => {
-                    return fieldName === 'deposits' ? 'Deposits' : 'Withdrawals';
-                  }
-                }}
-                onBarClick={(data, field) => {
-                  console.log('Bar clicked:', data, field);
-                }}
+                formatters={chartFormatters}
+                onBarClick={handleBarClick}
               />
             </div>
           </div>
@@ -393,8 +408,10 @@ export default function OverviewPage() {
               segmentSpacing={0.12}
               showInnerArc={true}
               innerArcOffset={1.1}
-              innerArcStrokeWidth={1}
-              innerArcOpacity={0.7}
+              innerArcStrokeWidth={1.5}
+              innerArcOpacity={0.8}
+              // outerArcStrokeWidth={12}
+              // outerArcOpacity={0.8}
             />
           </div>
         </div>
@@ -414,9 +431,7 @@ export default function OverviewPage() {
             data={tableData}
             columns={columns}
             className="animate-in fade-in duration-700 delay-700 p-2"
-            onRowClick={(row: any) => {
-              console.log('Transaction clicked:', row);
-            }}
+            onRowClick={handleTransactionClick}
           />
         </div>
         <div className='lg:col-span-1'>
@@ -447,9 +462,7 @@ export default function OverviewPage() {
               ]
             }
             className="animate-in fade-in duration-700 delay-700 p-2"
-            onRowClick={(row: any) => {
-              console.log('Transaction clicked:', row);
-            }}
+            onRowClick={handleApprovalClick}
           />
         </div>
       </div>

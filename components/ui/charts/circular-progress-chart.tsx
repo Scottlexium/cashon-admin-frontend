@@ -19,12 +19,14 @@ export interface CircularProgressChartProps {
     height?: number;
     radius?: number;
     strokeWidth?: number;
-    // Spacing and inner arc props
+    // Spacing and arc props
     segmentSpacing?: number;
     showInnerArc?: boolean;
     innerArcOffset?: number;
     innerArcStrokeWidth?: number;
     innerArcOpacity?: number;
+    outerArcStrokeWidth?: number;
+    outerArcOpacity?: number;
 }
 
 export function CircularProgressChart({
@@ -38,12 +40,14 @@ export function CircularProgressChart({
     height = 250,
     radius = 80,
     strokeWidth = 8,
-    // Spacing and inner arc props
+    // Spacing and arc props
     segmentSpacing = 0.08,
     showInnerArc = true,
     innerArcOffset = 1.2,
     innerArcStrokeWidth = 1.5,
-    innerArcOpacity = 0.8
+    innerArcOpacity = 0.8,
+    outerArcStrokeWidth = 2,
+    outerArcOpacity = 0.4
 }: CircularProgressChartProps) {
     const svgRef = useRef<SVGSVGElement>(null);
 
@@ -135,8 +139,8 @@ export function CircularProgressChart({
             .attr('d', backgroundArc as any)
             .attr('fill', 'none')
             .attr('stroke', 'url(#raceTrackGradient)')
-            .attr('stroke-width', 2)
-            .attr('opacity', 0.4);
+            .attr('strokeWidth', outerArcStrokeWidth)
+            .attr('opacity', outerArcOpacity);
 
         // Create pie generator for the data segments (270° arc)
         const pie = d3.pie<any>()
@@ -170,9 +174,9 @@ export function CircularProgressChart({
                 }
                 return segment.color;
             })
-            .attr('stroke-width', strokeWidth)
-            .attr('stroke-linecap', 'round') // Rounded endpoints
-            .attr('stroke-linejoin', 'round') // Rounded joins
+            .attr('strokeWidth', strokeWidth)
+            .attr('strokeLinecap', 'round') // Rounded endpoints
+            .attr('strokeLinejoin', 'round') // Rounded joins
             .style('opacity', 0)
             .transition()
             .duration(1000)
@@ -199,12 +203,12 @@ export function CircularProgressChart({
                 .attr('d', innerTrackArc as any)
                 .attr('fill', 'none')
                 .attr('stroke', '#404045') // Subtle gray inner track
-                .attr('stroke-width', innerArcStrokeWidth)
-                .attr('stroke-linecap', 'round')
+                .attr('strokeWidth', innerArcStrokeWidth)
+                .attr('strokeLinecap', 'round')
                 .attr('opacity', innerArcOpacity);
         }
 
-    }, [segments, width, height, radius, strokeWidth, totalValue, currency, locale, segmentSpacing, showInnerArc, innerArcOffset, innerArcStrokeWidth, innerArcOpacity]);
+    }, [segments, width, height, radius, strokeWidth, totalValue, currency, locale, segmentSpacing, showInnerArc, innerArcOffset, innerArcStrokeWidth, innerArcOpacity, outerArcStrokeWidth, outerArcOpacity]);
 
     return (
         <div className={`flex flex-col items-center ${className}`}>
@@ -234,13 +238,12 @@ export function CircularProgressChart({
             </div>
 
             {/* Grid Image - Separate section */}
-            <div className="-mt-10">
+            <div className="-mt-15 w-full">
                 <div
-                    className="bg-contain bg-center bg-no-repeat opacity-60"
+                    className="bg-contain bg-center bg-no-repeat w-full"
                     style={{
                         backgroundImage: 'url(/chart-grid.svg)',
-                        width: "600px",
-                        height: "80px",
+                        height: "90px",
                         // width: `${radius * 1.8}px`,
                         // height: `${radius * 0.7}px`,
                         // filter: 'brightness(0.6)'

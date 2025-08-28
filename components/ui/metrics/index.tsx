@@ -4,7 +4,7 @@ import { cn, formatValue } from '@/lib/utils';
 interface MetricsItem {
   title: string;
   value: string | number;
-  format?: 'currency' | 'number' | 'percentage';
+  format?: 'currency' | 'number' | 'percentage' | 'raw';
   prefix?: string;
   suffix?: string;
   currency?: string;
@@ -14,7 +14,7 @@ interface MetricsItem {
     type: 'increase' | 'decrease' | 'neutral';
     period?: string;
   };
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
 interface MetricsProps {
@@ -104,12 +104,14 @@ export function Metrics({
               
               {/* Header with icon and title */}
               <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
-                <div className={cn(
-                  'flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 group-hover:scale-110 group-hover:text-[#00FFB3]',
-                  variant === 'dark' ? 'text-[#8C8C93]' : 'text-gray-600'
-                )}>
-                  {item.icon}
-                </div>
+                {item.icon && (
+                  <div className={cn(
+                    'flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 group-hover:scale-110 group-hover:text-[#00FFB3]',
+                    variant === 'dark' ? 'text-[#8C8C93]' : 'text-gray-600'
+                  )}>
+                    {item.icon}
+                  </div>
+                )}
                 <span className={cn(
                   'text-xs sm:text-sm font-medium transition-colors duration-300 truncate',
                   variant === 'dark' ? 'text-[#8C8C93] group-hover:text-[#DEDEE3]' : 'text-gray-600 group-hover:text-gray-500'

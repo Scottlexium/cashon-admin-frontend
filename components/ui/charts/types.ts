@@ -81,6 +81,7 @@ export interface ChartProps {
   animation?: ChartAnimation;
   interactive?: boolean;
   responsive?: boolean;
+  showDataPoints?: boolean; // Control visibility of dots on line/area charts
   
   // Header
   title?: string;

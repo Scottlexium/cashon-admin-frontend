@@ -107,7 +107,7 @@ export function DataTable<T = any>({
   }
 
   return (
-    <div className={`rounded-xl ${bordered ? 'border-2' : ''} ${baseClasses} ${className}`}>
+    <div className={`${bordered ? 'border-2' : ''} ${baseClasses} ${className}`}>
       {/* Header Section */}
       {title && showHeader && (
         <div className="p-4 sm:p-6 border-b border-[#313135BA]">
