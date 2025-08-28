@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn, formatValue } from '@/lib/utils';
 
-interface MetricsItem {
+export interface MetricsItem {
   title: string;
   value: string | number;
   format?: 'currency' | 'number' | 'percentage' | 'raw';

@@ -1,14 +1,7 @@
 import {
-  HomeIcon,
   UsersIcon,
-  CreditCardIcon,
-  BanknotesIcon,
-  ArrowDownTrayIcon,
-  ArrowUpTrayIcon,
-  ChartBarIcon,
-  DocumentTextIcon,
-  Cog6ToothIcon,
   OverviewIcon,
+  ExchangeIcon,
 } from '@/components/icons';
 
 export interface NavigationItem {
@@ -20,5 +13,5 @@ export interface NavigationItem {
 export const navigation: NavigationItem[] = [
   { name: 'Overview', href: '/dashboard/overview', icon: OverviewIcon },
   { name: 'Users', href: '/dashboard/users', icon: UsersIcon },
-
+  { name: 'Transactions', href: '/dashboard/transactions', icon: ExchangeIcon },
 ];

@@ -211,6 +211,15 @@ export const ReceiptIcon = ({ className, ...props }: IconProps) => (
 );
 ReceiptIcon.displayName = 'ReceiptIcon';
 
+export const ExchangeIcon = ({ className, ...props }: IconProps) => (
+  <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+    <path d="M14 18.5C18.4183 18.5 22 14.9183 22 10.5C22 6.08172 18.4183 2.5 14 2.5C9.58172 2.5 6 6.08172 6 10.5C6 14.9183 9.58172 18.5 14 18.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M3.15657 11.5C2.42523 12.6176 2 13.9535 2 15.3888C2 19.3162 5.18378 22.5 9.11116 22.5C10.5465 22.5 11.8824 22.0748 13 21.3434" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M15.7712 8.70494C15.555 7.79281 14.4546 6.96974 13.1337 7.58549C11.8128 8.20124 11.603 10.1824 13.601 10.3928C14.5041 10.488 15.0928 10.2825 15.6319 10.8638C16.1709 11.4451 16.2711 13.0617 14.8931 13.4974C13.5151 13.9331 12.1506 13.2523 12.002 12.2857M13.9862 6.50391V7.37295M13.9862 13.6315V14.5039" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+ExchangeIcon.displayName = 'ExchangeIcon';
+
 const Icons = {
   PowerIcon,
   LockIcon,
@@ -236,6 +245,7 @@ const Icons = {
   LayersIcon,
   DatabaseIcon,
   ReceiptIcon,
+  ExchangeIcon,
 };
 
 export default Icons;
