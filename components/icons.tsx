@@ -220,6 +220,31 @@ export const ExchangeIcon = ({ className, ...props }: IconProps) => (
 );
 ExchangeIcon.displayName = 'ExchangeIcon';
 
+export const BoostIcon = ({ className, ...props }: IconProps) => (
+  <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+    <g clipPath="url(#clip0_1627_1127)">
+      <path d="M3.3335 11.334C4.81941 11.5106 6.2027 12.1819 7.26079 13.24C8.31888 14.2981 8.99024 15.6814 9.16683 17.1673C9.90343 16.7427 10.5196 16.1372 10.957 15.4081C11.3945 14.679 11.6388 13.8504 11.6668 13.0007C13.0661 12.5084 14.288 11.6123 15.178 10.4257C16.0679 9.23901 16.5861 7.8151 16.6668 6.33398C16.6668 5.67094 16.4034 5.03506 15.9346 4.56622C15.4658 4.09738 14.8299 3.83398 14.1668 3.83398C12.6857 3.91474 11.2618 4.43287 10.0752 5.32286C8.8885 6.21285 7.9924 7.43473 7.50016 8.83398C6.65038 8.86205 5.82179 9.10635 5.09272 9.5438C4.36364 9.98124 3.75815 10.5974 3.3335 11.334Z" stroke="currentColor" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5.83341 12.166C4.9661 12.6557 4.26479 13.3932 3.81937 14.284C3.37396 15.1748 3.20474 16.1784 3.33341 17.166C4.32104 17.2947 5.3246 17.1255 6.21543 16.6801C7.10626 16.2346 7.84377 15.5333 8.33341 14.666" stroke="currentColor" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M11.6665 7.99935C11.6665 8.22036 11.7543 8.43232 11.9106 8.5886C12.0669 8.74488 12.2788 8.83268 12.4998 8.83268C12.7209 8.83268 12.9328 8.74488 13.0891 8.5886C13.2454 8.43232 13.3332 8.22036 13.3332 7.99935C13.3332 7.77834 13.2454 7.56637 13.0891 7.41009C12.9328 7.25381 12.7209 7.16602 12.4998 7.16602C12.2788 7.16602 12.0669 7.25381 11.9106 7.41009C11.7543 7.56637 11.6665 7.77834 11.6665 7.99935Z" stroke="currentColor" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round"/>
+    </g>
+    <defs>
+      <clipPath id="clip0_1627_1127">
+        <rect width="20" height="20" fill="white" transform="translate(0 0.5)"/>
+      </clipPath>
+    </defs>
+  </svg>
+);
+BoostIcon.displayName = 'BoostIcon';
+
+export const ComplianceIcon = ({ className, ...props }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+    <path d="M12 2L2 7V10C2 16 6 20.5 12 22C18 20.5 22 16 22 10V7L12 2Z" 
+          stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <path d="M9 12L11 14L16 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+ComplianceIcon.displayName = 'ComplianceIcon';
+
 const Icons = {
   PowerIcon,
   LockIcon,
@@ -246,6 +271,8 @@ const Icons = {
   DatabaseIcon,
   ReceiptIcon,
   ExchangeIcon,
+  BoostIcon,
+  ComplianceIcon,
 };
 
 export default Icons;

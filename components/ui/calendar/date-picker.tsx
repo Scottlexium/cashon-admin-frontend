@@ -23,6 +23,7 @@ interface DatePickerProps {
   disabled?: boolean;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'split';
 }
 
 const RELATIVE_RANGES: RelativeRange[] = [
@@ -44,7 +45,8 @@ export function DatePicker({
   placeholder = 'Select date range...', 
   disabled = false,
   className,
-  size = 'md'
+  size = 'md',
+  variant = 'default'
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -251,37 +253,139 @@ export function DatePicker({
     return days;
   };
 
+  // Helper function to get short period label
+  const getShortPeriodLabel = (range: RelativeRange): string => {
+    const labelMap: Record<string, string> = {
+      'last-7-days': '7D',
+      'last-30-days': '30D',
+      'last-90-days': '90D',
+      'last-6-months': '6M',
+      'last-year': '1Y',
+      'this-month': 'TM',
+      'last-month': 'LM',
+      'this-quarter': 'TQ',
+      'last-quarter': 'LQ',
+      'year-to-date': 'YTD',
+    };
+    return labelMap[range.value] || range.label;
+  };
+
+  // Helper function to format date range for split variant
+  const formatDateRangeOnly = (): string => {
+    if (!value) return 'Select dates';
+    
+    if ('from' in value && 'to' in value) {
+      const fromDate = value.from.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      const toDate = value.to.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      return `${fromDate} - ${toDate}`;
+    }
+    
+    return 'Select dates';
+  };
+
   return (
     <div className={cn("relative", className)} ref={dropdownRef}>
-      {/* Trigger Button */}
-      <Button
-        ref={triggerRef}
-        onClick={toggleDropdown}
-        disabled={disabled}
-        variant="ghost"
-        size={size}
-        className={cn(
-          'w-fit justify-between bg-[#3A3A3D] border border-[#4A4A4F] text-[#DEDEE3]',
-          'hover:bg-[#4A4A4F] focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-[#4A4A4F]',
-          'min-w-0 font-medium',
-          disabled && 'opacity-50 cursor-not-allowed'
-        )}
-        style={{ borderRadius: '0.4375rem' }}
-      >
-        <span className="truncate min-w-0 text-left">{formatDisplayValue()}</span>
-        <svg 
-          width="14" 
-          height="14" 
-          viewBox="0 0 24 24" 
-          fill="none" 
+      {/* Trigger Button(s) */}
+      {variant === 'split' ? (
+        <div className="flex">
+          {/* Period Button */}
+          <Button
+            ref={triggerRef}
+            onClick={toggleDropdown}
+            disabled={disabled}
+            variant="ghost"
+            size={size}
+            className={cn(
+              'justify-between bg-[#3A3A3D] border border-[#4A4A4F] text-[#DEDEE3]',
+              'hover:bg-[#4A4A4F] focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-[#4A4A4F]',
+              'min-w-0 font-medium px-3 border-r-0 rounded-r-none',
+              disabled && 'opacity-50 cursor-not-allowed'
+            )}
+            style={{ borderTopLeftRadius: '0.4375rem', borderBottomLeftRadius: '0.4375rem' }}
+          >
+            <span className="truncate min-w-0 text-left">
+              {value && 'value' in value ? getShortPeriodLabel(value) : '6M'}
+            </span>
+            <svg 
+              width="12" 
+              height="12" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              className={cn(
+                'transition-all duration-300 flex-shrink-0 ml-1',
+                (isOpen || shouldRender) && 'rotate-180'
+              )}
+            >
+              <polyline points="6,9 12,15 18,9" stroke="currentColor" strokeWidth="2" fill="none"/>
+            </svg>
+          </Button>
+
+          {/* Date Range Button */}
+          <Button
+            onClick={toggleDropdown}
+            disabled={disabled}
+            variant="ghost"
+            size={size}
+            className={cn(
+              'justify-start bg-[#3A3A3D] border border-[#4A4A4F] text-[#DEDEE3]',
+              'hover:bg-[#4A4A4F] focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-[#4A4A4F]',
+              'min-w-0 font-medium flex-1 rounded-l-none',
+              disabled && 'opacity-50 cursor-not-allowed'
+            )}
+            style={{ borderTopRightRadius: '0.4375rem', borderBottomRightRadius: '0.4375rem' }}
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              className="flex-shrink-0 mr-2"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" fill="none"/>
+              <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2"/>
+              <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2"/>
+              <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+            <span className="truncate min-w-0 text-left">{formatDateRangeOnly()}</span>
+          </Button>
+        </div>
+      ) : (
+        /* Default Single Button */
+        <Button
+          ref={triggerRef}
+          onClick={toggleDropdown}
+          disabled={disabled}
+          variant="ghost"
+          size={size}
           className={cn(
-            'transition-all duration-300 flex-shrink-0 ml-2',
-            (isOpen || shouldRender) && 'rotate-180'
+            'w-fit justify-between bg-[#3A3A3D] border border-[#4A4A4F] text-[#DEDEE3]',
+            'hover:bg-[#4A4A4F] focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-[#4A4A4F]',
+            'min-w-0 font-medium',
+            disabled && 'opacity-50 cursor-not-allowed'
           )}
+          style={{ borderRadius: '0.4375rem' }}
         >
-          <polyline points="6,9 12,15 18,9" stroke="currentColor" strokeWidth="2" fill="none"/>
-        </svg>
-      </Button>
+          <span className="truncate min-w-0 text-left">{formatDisplayValue()}</span>
+          <svg 
+            width="14" 
+            height="14" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            className={cn(
+              'transition-all duration-300 flex-shrink-0 ml-2',
+              (isOpen || shouldRender) && 'rotate-180'
+            )}
+          >
+            <polyline points="6,9 12,15 18,9" stroke="currentColor" strokeWidth="2" fill="none"/>
+          </svg>
+        </Button>
+      )}
 
       {/* Dropdown / Bottom Sheet */}
       {shouldRender && (
@@ -324,32 +428,30 @@ export function DatePicker({
                 {/* Content */}
                 <div className="px-4 pb-safe max-h-[80vh] overflow-y-auto">
                   {/* Tab Navigation */}
-                  <div className="flex mb-4 bg-[#2C2C2E] rounded-lg p-1">
-                    <Button
-                      onClick={() => setActiveTab('relative')}
-                      variant={activeTab === 'relative' ? 'primary' : 'ghost'}
-                      size="sm"
-                      className={cn(
-                        'flex-1 transition-all duration-300 ease-out transform-gpu',
-                        activeTab === 'relative' ? 'scale-105 shadow-lg' : 'hover:scale-102'
-                      )}
-                    >
-                      Quick Ranges
-                    </Button>
-                    <Button
-                      onClick={() => setActiveTab('absolute')}
-                      variant={activeTab === 'absolute' ? 'primary' : 'ghost'}
-                      size="sm"
-                      className={cn(
-                        'flex-1 transition-all duration-300 ease-out transform-gpu',
-                        activeTab === 'absolute' ? 'scale-105 shadow-lg' : 'hover:scale-102'
-                      )}
-                    >
-                      Custom Range
-                    </Button>
-                  </div>
-
-                  {/* Tab Content */}
+              <div className="flex mb-4 bg-[#2C2C2E] rounded-lg p-1">
+                <Button
+                  onClick={() => setActiveTab('relative')}
+                  variant={activeTab === 'relative' ? 'primary' : 'ghost'}
+                  size="sm"
+                  className={cn(
+                    'flex-1 transition-all duration-300 ease-out transform-gpu focus:ring-0 focus:ring-offset-0',
+                    activeTab === 'relative' ? 'scale-105 shadow-lg' : 'hover:scale-102'
+                  )}
+                >
+                  Quick Ranges
+                </Button>
+                <Button
+                  onClick={() => setActiveTab('absolute')}
+                  variant={activeTab === 'absolute' ? 'primary' : 'ghost'}
+                  size="sm"
+                  className={cn(
+                    'flex-1 transition-all duration-300 ease-out transform-gpu focus:ring-0 focus:ring-offset-0',
+                    activeTab === 'absolute' ? 'scale-105 shadow-lg' : 'hover:scale-102'
+                  )}
+                >
+                  Custom Range
+                </Button>
+              </div>                  {/* Tab Content */}
                   {activeTab === 'relative' && (
                     <div className={cn(
                       'space-y-2 transition-all duration-400 ease-out',
@@ -480,31 +582,31 @@ export function DatePicker({
                   : undefined
               }}
             >
-              {/* Tab Navigation */}
-              <div className="flex mb-4 bg-[#2C2C2E] rounded-lg p-1">
-                <Button
-                  onClick={() => setActiveTab('relative')}
-                  variant={activeTab === 'relative' ? 'primary' : 'ghost'}
-                  size="sm"
-                  className={cn(
-                    'flex-1 transition-all duration-300 ease-out transform-gpu',
-                    activeTab === 'relative' ? 'scale-105 shadow-lg' : 'hover:scale-102'
-                  )}
-                >
-                  Quick Ranges
-                </Button>
-                <Button
-                  onClick={() => setActiveTab('absolute')}
-                  variant={activeTab === 'absolute' ? 'primary' : 'ghost'}
-                  size="sm"
-                  className={cn(
-                    'flex-1 transition-all duration-300 ease-out transform-gpu',
-                    activeTab === 'absolute' ? 'scale-105 shadow-lg' : 'hover:scale-102'
-                  )}
-                >
-                  Custom Range
-                </Button>
-              </div>
+                  {/* Tab Navigation */}
+                  <div className="flex mb-4 bg-[#2C2C2E] rounded-lg p-1">
+                    <Button
+                      onClick={() => setActiveTab('relative')}
+                      variant={activeTab === 'relative' ? 'primary' : 'ghost'}
+                      size="sm"
+                      className={cn(
+                        'flex-1 transition-all duration-300 ease-out transform-gpu focus:ring-0 focus:ring-offset-0',
+                        activeTab === 'relative' ? 'scale-105 shadow-lg text-primary font-semibold' : 'hover:scale-102 text-[#8C8C93] hover:text-[#DEDEE3]'
+                      )}
+                    >
+                      Quick Ranges
+                    </Button>
+                    <Button
+                      onClick={() => setActiveTab('absolute')}
+                      variant={activeTab === 'absolute' ? 'primary' : 'ghost'}
+                      size="sm"
+                      className={cn(
+                        'flex-1 transition-all duration-300 ease-out transform-gpu focus:ring-0 focus:ring-offset-0',
+                        activeTab === 'absolute' ? 'scale-105 shadow-lg text-primary font-semibold' : 'hover:scale-102 text-[#8C8C93] hover:text-[#DEDEE3]'
+                      )}
+                    >
+                      Custom Range
+                    </Button>
+                  </div>
 
               {/* Tab Content */}
               {activeTab === 'relative' && (

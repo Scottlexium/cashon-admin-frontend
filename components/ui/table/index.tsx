@@ -126,23 +126,25 @@ export function DataTable<T = any>({
       <div className="overflow-x-auto">
         <table className="w-full">
           {/* Table Header */}
-          <thead className={headerClasses}>
-            <tr>
-              {columns.map((column, index) => (
-                <th
-                  key={`header-${column.key}-${index}`}
-                  className={`
-                    px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium uppercase tracking-wider
-                    ${getAlignmentClass(column.align)}
-                    ${column.className || ''}
-                  `}
-                  style={{ width: column.width }}
-                >
-                  {column.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
+          {showHeader && (
+            <thead className={headerClasses}>
+              <tr>
+                {columns.map((column, index) => (
+                  <th
+                    key={`header-${column.key}-${index}`}
+                    className={`
+                      px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium uppercase tracking-wider
+                      ${getAlignmentClass(column.align)}
+                      ${column.className || ''}
+                    `}
+                    style={{ width: column.width }}
+                  >
+                    {column.header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+          )}
 
           {/* Table Body */}
           <tbody className="divide-y divide-[#313135BA]">

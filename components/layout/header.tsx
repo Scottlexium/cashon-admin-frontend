@@ -9,6 +9,11 @@ interface HeaderProps {}
 export function Header({}: HeaderProps) {
   const pathname = usePathname();
 
+  // Hide header on compliance details pages
+  if (pathname.startsWith('/dashboard/compliance/') && pathname !== '/dashboard/compliance') {
+    return null;
+  }
+
   // Get page info dynamically from shared navigation array
   const getPageInfo = (path: string) => {
     // Find exact match first
