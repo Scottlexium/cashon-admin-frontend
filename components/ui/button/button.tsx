@@ -20,8 +20,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   
   const variants = {
     primary: 'bg-primary text-black hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 rounded-lg shadow-cashon-sm',
-    secondary: 'bg-surface-secondary text-text-primary border border-border hover:bg-border-light rounded-lg',
-    outline: 'border border-border bg-transparent text-text-primary hover:bg-surface-secondary rounded-lg',
+    secondary: 'bg-surface-secondary text-text-primary border border-border hover:bg-border-light rounded-[10px]',
+    outline: 'border border-border bg-transparent text-text-primary hover:bg-surface-secondary rounded-[10px]',
     ghost: 'text-text-secondary hover:text-text-primary hover:bg-surface-secondary rounded-md',
     danger: 'bg-error text-white hover:bg-error/90 rounded-lg shadow-cashon-sm',
     addon: 'bg-surface border border-border-light text-text-primary hover:bg-surface-secondary rounded-md shadow-cashon-sm',

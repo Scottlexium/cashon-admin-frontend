@@ -5,6 +5,7 @@ import { AlertCircle, Check, ChevronDown, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { validators, type ValidatorFn } from '@/lib/validators';
 import { type SelectProps } from './types';
+import { useDropdownPosition } from '@/lib/hooks/useDropdownPosition';
 
 export const Select = ({
   label,
@@ -40,6 +41,14 @@ export const Select = ({
   
   const selectRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Use the dropdown positioning hook
+  const { position: dropdownPosition } = useDropdownPosition({
+    isOpen,
+    triggerRef: selectRef as React.RefObject<HTMLElement>,
+    dropdownHeight: parseInt(maxHeight.replace('px', '')) + 100,
+    minSpaceRequired: 100
+  });
 
   // Sync internal value with external value
   useEffect(() => {
@@ -207,16 +216,16 @@ export const Select = ({
   return (
     <div className={cn("space-y-2", className)} ref={selectRef}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-[#8C8C93]">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-[#FF4D4F] ml-1">*</span>}
         </label>
       )}
       
       <div className="relative">
         {/* Leading Icon */}
         {leadingIcon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#8C8C93]">
             {leadingIcon}
           </div>
         )}
@@ -228,20 +237,20 @@ export const Select = ({
           onBlur={handleBlur}
           disabled={disabled}
           className={cn(
-            "w-full py-3 border rounded-lg transition-all duration-200 text-left",
-            "focus:outline-none focus:ring-4 focus:ring-opacity-20",
+            "w-full py-2.5 h-10 min-h-[2.5rem] border rounded-md transition-all duration-200 text-left bg-[#2A2C2E] border-[#3A3C3E]",
+            "focus:outline-none focus:border-[#00E6A3] focus:shadow-[0_0_0_3px_rgba(0,230,163,0.15)]",
             hasError 
-              ? "border-red-300 focus:ring-red-500 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/25"
+              ? "border-[#FF4D4F] focus:border-[#FF4D4F] focus:shadow-[0_0_0_3px_rgba(255,77,79,0.15)]"
               : isValid
-              ? "border-green-300 focus:ring-green-500 focus:border-green-500 focus:shadow-lg focus:shadow-green-500/25"
-              : "border-gray-300 focus:ring-blue-500 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/25",
-            disabled ? "bg-gray-50 cursor-not-allowed" : "bg-white cursor-pointer hover:border-gray-400",
+              ? "border-[#00E6A3] focus:border-[#00E6A3] focus:shadow-[0_0_0_3px_rgba(0,230,163,0.15)]"
+              : "hover:border-[#4A4C4E]",
+            disabled ? "bg-[#2A2C2E] cursor-not-allowed opacity-75" : "cursor-pointer",
             leadingIcon ? "pl-10" : "pl-3",
             clearable && hasValue ? "pr-16" : showValidationIcon && (hasError || isValid) ? "pr-16" : "pr-10"
           )}
           {...props}
         >
-          <span className={hasValue ? "text-gray-900" : "text-gray-500"}>
+          <span className={hasValue ? "text-[#DEDEE3]" : "text-[#8C8C93]"}>
             {getDisplayText()}
           </span>
         </button>
@@ -254,7 +263,7 @@ export const Select = ({
               e.stopPropagation();
               handleClear();
             }}
-            className="absolute inset-y-0 right-8 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            className="absolute inset-y-0 right-8 flex items-center text-[#8C8C93] hover:text-[#DEDEE3] transition-colors duration-200"
           >
             <X size={20} />
           </button>
@@ -264,7 +273,7 @@ export const Select = ({
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
           <ChevronDown 
             className={cn(
-              "text-gray-400 transition-transform duration-200",
+              "text-[#8C8C93] transition-transform duration-200",
               isOpen && "transform rotate-180"
             )}
             size={20} 
@@ -275,28 +284,33 @@ export const Select = ({
         {showValidationIcon && (hasError || isValid) && (
           <div className="absolute inset-y-0 right-8 flex items-center pointer-events-none">
             {hasError ? (
-              <AlertCircle className="text-red-500" size={20} />
+              <AlertCircle className="text-[#FF4D4F]" size={20} />
             ) : (
-              <Check className="text-green-500" size={20} />
+              <Check className="text-[#00E6A3]" size={20} />
             )}
           </div>
         )}
 
         {/* Dropdown */}
         {isOpen && !disabled && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+          <div 
+            className={cn(
+              'absolute z-50 w-full mt-1 bg-[#2A2C2E] border border-[#3A3C3E] rounded-md shadow-lg',
+              dropdownPosition === 'top' ? 'bottom-full mb-1' : 'top-full'
+            )}
+          >
             {/* Search Input */}
             {searchable && (
-              <div className="p-3 border-b border-gray-200">
+              <div className="p-3 border-b border-[#3A3C3E]">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8C8C93]" size={16} />
                   <input
                     ref={searchInputRef}
                     type="text"
                     placeholder="Search options..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-9 pr-3 py-2 bg-[#2A2C2E] border border-[#3A3C3E] rounded-md text-[#DEDEE3] placeholder-[#8C8C93] focus:outline-none focus:border-[#00E6A3] focus:shadow-[0_0_0_3px_rgba(0,230,163,0.15)]"
                   />
                 </div>
               </div>
@@ -305,7 +319,7 @@ export const Select = ({
             {/* Options List */}
             <div className={cn("overflow-y-auto")} style={{ maxHeight: maxHeight }}>
               {filteredOptions.length === 0 ? (
-                <div className="p-3 text-gray-500 text-center">
+                <div className="p-3 text-[#8C8C93] text-center">
                   {searchTerm ? 'No options found' : 'No options available'}
                 </div>
               ) : (
@@ -315,10 +329,10 @@ export const Select = ({
                     type="button"
                     onClick={() => handleOptionSelect(option.value)}
                     className={cn(
-                      "w-full text-left px-3 py-2 hover:bg-gray-100 transition-colors duration-150",
+                      "w-full text-left px-3 py-2 hover:bg-[#3A3C3E] transition-colors duration-150",
                       isOptionSelected(option.value) 
-                        ? "bg-blue-50 text-blue-700 font-medium" 
-                        : "text-gray-900",
+                        ? "bg-[#00E6A3]/10 text-[#00E6A3] font-medium" 
+                        : "text-[#DEDEE3]",
                       option.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                     )}
                     disabled={option.disabled}
@@ -326,11 +340,11 @@ export const Select = ({
                     <div className="flex items-center justify-between">
                       <span>{option.label}</span>
                       {isOptionSelected(option.value) && (
-                        <Check className="text-blue-600" size={16} />
+                        <Check className="text-[#00E6A3]" size={16} />
                       )}
                     </div>
                     {option.description && (
-                      <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                      <p className="text-sm text-[#8C8C93] mt-1">{option.description}</p>
                     )}
                   </button>
                 ))
@@ -342,7 +356,7 @@ export const Select = ({
       
       {/* Error message */}
       {hasError && (
-        <p className="text-sm text-red-600 flex items-center space-x-1">
+        <p className="text-sm text-[#FF4D4F] flex items-center space-x-1">
           <AlertCircle size={16} />
           <span>{error}</span>
         </p>
@@ -350,7 +364,7 @@ export const Select = ({
       
       {/* Help text */}
       {helpText && !hasError && (
-        <p className="text-sm text-gray-500">{helpText}</p>
+        <p className="text-sm text-[#8C8C93]">{helpText}</p>
       )}
     </div>
   );

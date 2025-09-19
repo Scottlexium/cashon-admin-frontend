@@ -7,7 +7,7 @@ export interface InfoField {
 
 export interface UserInfoSectionProps {
   title: string;
-  dotColor?: 'orange' | 'purple' | 'blue' | 'green' | 'red';
+  dotColor?: string;
   fields: InfoField[];
   columns?: 1 | 2;
   className?: string;
@@ -15,18 +15,12 @@ export interface UserInfoSectionProps {
 
 const UserInfoSection: React.FC<UserInfoSectionProps> = ({
   title,
-  dotColor = 'orange',
+  dotColor = '#E8A14F',
   fields,
   columns = 2,
   className = ''
 }) => {
-  const dotColorClasses = {
-    orange: 'bg-orange-400',
-    purple: 'bg-purple-400',
-    blue: 'bg-blue-400',
-    green: 'bg-green-400',
-    red: 'bg-red-400'
-  };
+  
 
   // Split fields into columns
   const fieldsPerColumn = Math.ceil(fields.length / columns);
@@ -52,7 +46,7 @@ const UserInfoSection: React.FC<UserInfoSectionProps> = ({
     <div className={`space-y-4 ${className}`}>
       {/* Section Header */}
       <div className="flex items-center gap-2 mb-6">
-        <div className={`w-2 h-2 ${dotColorClasses[dotColor]} rounded-full`}></div>
+        <div className={`w-2.5 h-2.5 rounded-xs`} style={{ backgroundColor: dotColor }}></div>
         <h2 className="text-lg font-medium text-white">{title}</h2>
       </div>
       

@@ -8,8 +8,10 @@ import React, { useState } from 'react'
 import { DatePicker, DateRange, RelativeRange } from '@/components/ui/calendar/date-picker';
 import { ReceiptIcon, UsersIcon } from '@/components/icons';
 import { CircularProgressChart, CircularProgressChartProps } from '@/components/ui/charts/circular-progress-chart';
+import  { useRouter } from 'next/navigation';
 
 const Page = () => {
+  const router = useRouter();
   const statsData = [
     {
       title: 'Total Users',
@@ -230,7 +232,9 @@ const Page = () => {
   });
 
   const [searchQuery, setSearchQuery] = useState('');
-
+  const handleRowClick = (row:any) => {
+    router.push(`/dashboard/users/${row.userId}`);
+  };
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
       <div className="px-4 sm:px-6 animate-in slide-in-from-top duration-600">
@@ -256,7 +260,7 @@ const Page = () => {
             {/* Top Row - Icon, Title and Date Filter */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-0 mb-4 sm:mb-6">
               <div className="flex items-center gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-[#303033] border-[0.78px] border-[#363639] flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-[#303033] border-[0.78px] border-[#363639] flex items-center justify-center">
                   <UsersIcon width={18} height={18} />
                 </div>
                 <div>
@@ -451,6 +455,7 @@ const Page = () => {
             variant="dark"
             bordered={false}
             className="animate-in fade-in duration-700 delay-700"
+            onRowClick={handleRowClick}
           />
         </div>
       </div>

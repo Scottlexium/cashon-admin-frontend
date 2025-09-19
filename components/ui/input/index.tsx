@@ -65,7 +65,41 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
 
   // Handle input change
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+    let newValue = e.target.value;
+    
+    // Special handling for number inputs
+    if (type === 'number') {
+      // Allow empty string for clearing
+      if (newValue === '') {
+        setInternalValue(newValue);
+        if (onChange) {
+          onChange(e);
+        }
+        return;
+      }
+      
+      // Remove any non-numeric characters except decimal point
+      newValue = newValue.replace(/[^0-9.]/g, '');
+      
+      // Ensure only one decimal point
+      const decimalCount = (newValue.match(/\./g) || []).length;
+      if (decimalCount > 1) {
+        const firstDecimalIndex = newValue.indexOf('.');
+        newValue = newValue.substring(0, firstDecimalIndex + 1) + newValue.substring(firstDecimalIndex + 1).replace(/\./g, '');
+      }
+      
+      // Parse to number and check if valid
+      const numValue = parseFloat(newValue);
+      
+      // Prevent negative numbers and NaN
+      if (numValue < 0 || (newValue !== '' && isNaN(numValue))) {
+        return; // Don't update if invalid
+      }
+      
+      // Update the event target value for consistency
+      e.target.value = newValue;
+    }
+    
     setInternalValue(newValue);
     
     if (onChange) {
@@ -75,7 +109,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
     if (validateOnChange && touched) {
       debouncedValidate(newValue);
     }
-  }, [onChange, validateOnChange, touched, debouncedValidate]);
+  }, [onChange, validateOnChange, touched, debouncedValidate, type]);
 
   // Handle blur
   const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
@@ -90,6 +124,33 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
       onBlur(e);
     }
   }, [onBlur, validateOnBlur, validateInput]);
+
+  // Handle key down for number inputs
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (type === 'number') {
+      // Allow backspace, delete, tab, escape, enter, home, end, arrow keys
+      if ([8, 9, 27, 13, 46, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+          // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z
+          (e.keyCode === 65 && e.ctrlKey === true) || // Select all
+          (e.keyCode === 67 && e.ctrlKey === true) || // Copy
+          (e.keyCode === 86 && e.ctrlKey === true) || // Paste
+          (e.keyCode === 88 && e.ctrlKey === true) || // Cut
+          (e.keyCode === 90 && e.ctrlKey === true)) { // Undo
+        return;
+      }
+      
+      // Prevent minus sign, plus sign, and 'e' (scientific notation)
+      if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
+        e.preventDefault();
+        return;
+      }
+      
+      // Ensure that it is a number and stop the keypress
+      if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105) && e.keyCode !== 190 && e.keyCode !== 110) {
+        e.preventDefault();
+      }
+    }
+  }, [type]);
 
   // Toggle password visibility
   const togglePasswordVisibility = useCallback(() => {
@@ -138,10 +199,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
           value={internalValue}
           onChange={handleChange}
           onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
             'w-full transition-all duration-300 ease-in-out outline-none focus:outline-none',
+            // Hide number input spinners
+            type === 'number' && '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
             variant === 'default' && 'rounded-md shadow-sm bg-surface border border-border',
             variant === 'filled' && 'rounded-md shadow-sm bg-[#2A2C2E] border border-[#3A3C3E]',
             variant === 'outlined' && 'rounded-md shadow-none bg-transparent border border-[#3A3C3E]',

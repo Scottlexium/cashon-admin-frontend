@@ -5,6 +5,7 @@ import {
   RevenueIcon,
   BoostIcon,
   ComplianceIcon,
+  Cog6ToothIcon,
 } from '@/components/icons';
 
 export interface NavigationItem {
@@ -19,4 +20,6 @@ export const navigation: NavigationItem[] = [
   { name: 'Transactions', href: '/dashboard/transactions', icon: ExchangeIcon },
   { name: 'Boost', href: '/dashboard/boost', icon: BoostIcon },
   { name: 'Compliance', href: '/dashboard/compliance', icon: ComplianceIcon },
+  { name: 'Growth', href: '/dashboard/growth', icon: RevenueIcon },
+  { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
 ];

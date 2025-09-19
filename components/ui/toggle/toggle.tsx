@@ -53,22 +53,22 @@ const Toggle: React.FC<ToggleProps> = ({
     default: {
       checked: 'bg-[#3AF4BD] border-[#3AF4BD]',
       unchecked: 'bg-[#303033] border-[#363639]',
-      thumb: 'bg-white',
+      thumb: 'bg-black',
     },
     success: {
       checked: 'bg-green-500 border-green-500',
       unchecked: 'bg-[#303033] border-[#363639]',
-      thumb: 'bg-white',
+      thumb: 'bg-black',
     },
     warning: {
       checked: 'bg-yellow-500 border-yellow-500',
       unchecked: 'bg-[#303033] border-[#363639]',
-      thumb: 'bg-white',
+      thumb: 'bg-black',
     },
     danger: {
       checked: 'bg-red-500 border-red-500',
       unchecked: 'bg-[#303033] border-[#363639]',
-      thumb: 'bg-white',
+      thumb: 'bg-black',
     },
   };
 
@@ -109,8 +109,8 @@ const Toggle: React.FC<ToggleProps> = ({
             sizes.thumb,
             // Color
             colors.thumb,
-            // Position - center vertically and move horizontally
-            'absolute top-0.5 left-0.5',
+            // Position - perfectly center on Y axis, with padding on X axis
+            'absolute top-1/2 left-0.5 -translate-y-1/2',
             checked ? sizes.translate : 'translate-x-0',
           )}
         />

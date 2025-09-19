@@ -85,7 +85,7 @@ const DetailPageHeader: React.FC<DetailPageHeaderProps> = ({
             {avatar ? (
               <img src={avatar} alt={name} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-black font-bold text-lg sm:text-xl lg:text-2xl">
+              <span className="text-black font-bold text-base sm:text-lg lg:text-xl">
                 {getInitials(name)}
               </span>
             )}
@@ -95,7 +95,7 @@ const DetailPageHeader: React.FC<DetailPageHeaderProps> = ({
           <div className="space-y-4 md:space-y-6 w-full sm:w-auto">
             {/* Name and Badge */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-              <h1 className="text-xl sm:text-2xl font-medium text-[#DEDEE3]">
+              <h1 className="text-base sm:text-xl font-medium text-[#DEDEE3]">
                 {name}
               </h1>
               
@@ -111,13 +111,13 @@ const DetailPageHeader: React.FC<DetailPageHeaderProps> = ({
             <div className="space-y-3 md:space-y-4">
               {fields.map((field) => (
                 <div key={field.key} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-4 h-4 text-[#8C8C93] flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <div className="w-5 h-5 text-[#8C8C93] flex items-center justify-center flex-shrink-0">
                       {field.icon}
                     </div>
-                    <span className="text-sm sm:text-base text-[#8C8C9399] sm:min-w-[140px]">{field.label}</span>
+                    <span className="text-sm sm:text-lg text-[#8C8C9399] sm:min-w-[140px]">{field.label}</span>
                   </div>
-                  <span className="text-sm sm:text-base text-[#8C8C93] font-semibold sm:ml-0 ml-6">{field.value}</span>
+                  <span className="text-xs sm:text-sm text-[#8C8C93] font-semibold sm:ml-0 ml-6">{field.value}</span>
                 </div>
               ))}
             </div>
@@ -128,7 +128,7 @@ const DetailPageHeader: React.FC<DetailPageHeaderProps> = ({
         {rightContent && (
           <div className="text-left lg:text-right mt-4 lg:mt-0 w-full lg:w-auto">
             <p className="text-xs sm:text-sm text-[#FFFFFF4D] font-semibold mb-2 tracking-wider">{rightContent.label}</p>
-            <p className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-[#DEDEE3]">{rightContent.value}</p>
+            <p className="text-3xl sm:text-4xl lg:text-[3.2rem] font-bold text-[#DEDEE3]">{rightContent.value}</p>
             {rightContent.subtitle && (
               <p className="text-xs sm:text-sm text-[#8C8C93] mt-1">{rightContent.subtitle}</p>
             )}
