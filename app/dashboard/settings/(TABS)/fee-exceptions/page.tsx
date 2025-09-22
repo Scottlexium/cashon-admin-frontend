@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Modal } from '@/components/ui/modal';
-import { Badge } from '@/components/ui/badge';
+import Badge from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 
 const FeeExceptionsPage = () => {
@@ -20,130 +20,134 @@ const FeeExceptionsPage = () => {
     // Mock data for fee exceptions
     const exceptionsData = [
         {
-            id: '1',
-            userId: 'user_12345',
-            userEmail: 'john.doe@example.com',
-            exceptionType: 'Early Withdrawal',
-            status: 'Active',
-            createdDate: '2025-09-15',
-            expiryDate: '2026-09-15',
-            reason: 'Premium customer loyalty program'
+            id: '2874829372',
+            name: 'Daniel Owolabi',
+            email: 'daniel.owolabi@cashonrails.com',
+            feeType: 'Early Withdrawal',
+            exception: 'Waive',
+            date: '08 Aug 2025, 14:32'
         },
         {
-            id: '2',
-            userId: 'user_67890',
-            userEmail: 'jane.smith@example.com',
-            exceptionType: 'Processing Fee',
-            status: 'Active',
-            createdDate: '2025-09-10',
-            expiryDate: 'Permanent',
-            reason: 'Corporate account agreement'
+            id: '4764829013',
+            name: 'Jane Doe',
+            email: 'janedoe789@gmail.com',
+            feeType: 'Inactivity',
+            exception: 'Inactivity',
+            date: '08 Aug 2025, 14:32'
         },
         {
-            id: '3',
-            userId: 'user_54321',
-            userEmail: 'mike.wilson@example.com',
-            exceptionType: 'Monthly Fee',
-            status: 'Expired',
-            createdDate: '2025-08-01',
-            expiryDate: '2025-09-01',
-            reason: 'Promotional period'
+            id: '4764829013',
+            name: 'Will Smith',
+            email: 'johnsmith456@yahoo.com',
+            feeType: 'Account Closure',
+            exception: 'Account Closure',
+            date: '08 Aug 2025, 14:32'
         },
         {
-            id: '4',
-            userId: 'user_98765',
-            userEmail: 'sarah.johnson@example.com',
-            exceptionType: 'Transaction Fee',
-            status: 'Active',
-            createdDate: '2025-09-12',
-            expiryDate: '2025-12-12',
-            reason: 'High-value customer retention'
+            id: '4764829013',
+            name: 'Annalise Keating',
+            email: 'alice.jones@gmail.com',
+            feeType: 'Insufficient Funds',
+            exception: 'Insufficient Funds',
+            date: '08 Aug 2025, 14:32'
+        },
+        {
+            id: '4764829013',
+            name: 'Michael Scott',
+            email: '',
+            feeType: '',
+            exception: 'Overdraft Fee',
+            date: '08 Aug 2025, 14:32'
+        },
+        {
+            id: '4764829013',
+            name: 'Harriet Tubman',
+            email: '',
+            feeType: '',
+            exception: 'Monthly Maintenance',
+            date: '08 Aug 2025, 14:32'
+        },
+        {
+            id: '4764829013',
+            name: 'Leonardo DiCaprio',
+            email: '',
+            feeType: '',
+            exception: 'Transaction Limit Exceeded',
+            date: '08 Aug 2025, 14:32'
+        },
+        {
+            id: '4764829013',
+            name: 'Oprah Winfrey',
+            email: '',
+            feeType: '',
+            exception: 'Wire Transfer Fee',
+            date: '08 Aug 2025, 14:32'
+        },
+        {
+            id: '4764829013',
+            name: 'Shakespeare',
+            email: '',
+            feeType: '',
+            exception: 'Foreign Transaction Fee',
+            date: '08 Aug 2025, 14:32'
+        },
+        {
+            id: '',
+            name: '',
+            email: '',
+            feeType: '',
+            exception: 'Minimum Balance Requirement',
+            date: ''
         }
     ];
 
     const columns: TableColumn[] = [
         {
-            key: 'user',
+            key: 'id',
             header: 'USER',
             sortable: true,
             render: (value: any, row: any) => (
-                <div>
-                    <span className="text-[#DEDEE3] font-medium">{row.userEmail}</span>
-                    <p className="text-[#8C8C93] text-sm mt-1">ID: {row.userId}</p>
-                </div>
+                <span className="text-[#8C8C93]">{row.id}</span>
             )
         },
         {
-            key: 'exceptionType',
-            header: 'EXCEPTION TYPE',
+            key: 'name',
+            header: 'NAME',
             sortable: true,
             render: (value: any, row: any) => (
-                <span className="text-[#DEDEE3]">{row.exceptionType}</span>
+                <span className="text-[#DEDEE3] font-medium">{row.name}</span>
             )
         },
         {
-            key: 'status',
-            header: 'STATUS',
-            sortable: true,
-            render: (value: any, row: any) => {
-                const status = row.status;
-                let statusColor = '';
-                
-                switch (status) {
-                    case 'Active':
-                        statusColor = 'bg-green-500/20 text-green-400';
-                        break;
-                    case 'Expired':
-                        statusColor = 'bg-red-500/20 text-red-400';
-                        break;
-                    default:
-                        statusColor = 'bg-gray-500/20 text-gray-400';
-                }
-
-                return (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
-                        {status}
-                    </span>
-                );
-            }
-        },
-        {
-            key: 'expiryDate',
-            header: 'EXPIRY DATE',
+            key: 'email',
+            header: 'EMAIL ADDRESS',
             sortable: true,
             render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.expiryDate}</span>
+                <span className="text-[#8C8C93]">{row.email}</span>
             )
         },
         {
-            key: 'reason',
-            header: 'REASON',
-            sortable: false,
+            key: 'feeType',
+            header: 'FEE TYPE',
+            sortable: true,
             render: (value: any, row: any) => (
-                <span className="text-[#8C8C93] truncate max-w-[200px] block">{row.reason}</span>
+                <span className="text-[#DEDEE3]">{row.feeType}</span>
             )
         },
         {
-            key: 'actions',
-            header: 'ACTIONS',
-            sortable: false,
+            key: 'exception',
+            header: 'EXCEPTION',
+            sortable: true,
             render: (value: any, row: any) => (
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[#8C8C93] hover:text-[#DEDEE3]"
-                    >
-                        Edit
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-400 hover:text-red-300"
-                    >
-                        Revoke
-                    </Button>
-                </div>
+                <span className="text-[#DEDEE3]">{row.exception}</span>
+            )
+        },
+        {
+            key: 'date',
+            header: 'DATE',
+            sortable: true,
+            render: (value: any, row: any) => (
+                <span className="text-[#8C8C93]">{row.date}</span>
             )
         }
     ];
@@ -186,39 +190,51 @@ const FeeExceptionsPage = () => {
 
     return (
         <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 className="text-lg font-medium text-[#DEDEE3]">Fee Exceptions</h2>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="bg-[#00FFB3] text-black hover:bg-[#00FFB3]/90"
+                    >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Exception
+                    </Button>
+                </div>
+            </div>
+
             <div className="rounded-xl p-4 sm:p-6 bg-[#1C1C1E] border-[#313135BA] border-2">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <div>
-                        <h2 className="text-lg font-medium text-[#DEDEE3]">Fee Exceptions</h2>
-                        <p className="text-[#8C8C93] text-sm mt-1">Manage fee waivers and exceptions for users</p>
+
+                {/* Filter Section */}
+                <div className="flex items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-2">
+                        <svg className="w-5 h-5 text-[#8C8C93]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-[#DEDEE3] font-medium">KYC Verification</span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        <div className="flex items-center gap-3">
-                            <Input
-                                placeholder="Search by user email..."
-                                variant="filled"
-                                className="w-full sm:w-64"
-                            />
-                            <Select
-                                options={[
-                                    { value: 'all', label: 'All Status' },
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'expired', label: 'Expired' }
-                                ]}
-                                placeholder="Status"
-                                variant="filled"
-                                className="w-full sm:w-32"
-                            />
-                        </div>
-                        <Button
-                            onClick={() => setIsCreateModalOpen(true)}
-                            className="bg-[#00FFB3] text-black hover:bg-[#00FFB3]/90"
-                        >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    <div className="flex items-center gap-3">
+                        <Input
+                            placeholder="Search"
+                            variant="filled"
+                            className="w-64"
+                        />
+                        <Button>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                             </svg>
-                            New Exception
+                        </Button>
+                        <Button variant='secondary'>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Download
                         </Button>
                     </div>
                 </div>
@@ -229,26 +245,6 @@ const FeeExceptionsPage = () => {
                     variant="dark"
                     className="border-none"
                 />
-            </div>
-
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <div className="rounded-xl p-4 bg-[#1C1C1E] border-[#313135BA] border-2">
-                    <div className="text-2xl font-bold text-[#DEDEE3]">24</div>
-                    <div className="text-[#8C8C93] text-sm">Total Exceptions</div>
-                </div>
-                <div className="rounded-xl p-4 bg-[#1C1C1E] border-[#313135BA] border-2">
-                    <div className="text-2xl font-bold text-green-400">18</div>
-                    <div className="text-[#8C8C93] text-sm">Active</div>
-                </div>
-                <div className="rounded-xl p-4 bg-[#1C1C1E] border-[#313135BA] border-2">
-                    <div className="text-2xl font-bold text-red-400">6</div>
-                    <div className="text-[#8C8C93] text-sm">Expired</div>
-                </div>
-                <div className="rounded-xl p-4 bg-[#1C1C1E] border-[#313135BA] border-2">
-                    <div className="text-2xl font-bold text-[#DEDEE3]">$12,450</div>
-                    <div className="text-[#8C8C93] text-sm">Fees Waived (YTD)</div>
-                </div>
             </div>
 
             {/* Create Fee Exception Modal */}
@@ -279,7 +275,6 @@ const FeeExceptionsPage = () => {
                             value={formData.exceptionType}
                             onChange={(value) => handleFormInputChange('exceptionType', value)}
                             placeholder="Select exception type"
-                            variant="filled"
                             className="w-full"
                         />
                     </div>
@@ -291,7 +286,6 @@ const FeeExceptionsPage = () => {
                             value={formData.duration}
                             onChange={(value) => handleFormInputChange('duration', value)}
                             placeholder="Select duration"
-                            variant="filled"
                             className="w-full"
                         />
                     </div>

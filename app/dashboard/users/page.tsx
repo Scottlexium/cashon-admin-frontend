@@ -232,9 +232,6 @@ const Page = () => {
   });
 
   const [searchQuery, setSearchQuery] = useState('');
-  const handleRowClick = (row:any) => {
-    router.push(`/dashboard/users/${row.userId}`);
-  };
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
       <div className="px-4 sm:px-6 animate-in slide-in-from-top duration-600">
@@ -455,7 +452,7 @@ const Page = () => {
             variant="dark"
             bordered={false}
             className="animate-in fade-in duration-700 delay-700"
-            onRowClick={handleRowClick}
+            onRowClick={(row) => router.push(`/dashboard/users/${row.id}`)}
           />
         </div>
       </div>

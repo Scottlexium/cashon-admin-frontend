@@ -18,7 +18,7 @@ interface TabsProps {
     activeTab?: string;
     onTabChange?: (tabId: string) => void;
     defaultTab?: string;
-    variant?: 'default' | 'pills' | 'underline';
+    variant?: 'default' | 'pills' | 'underline' | 'toggle';
     size?: 'sm' | 'md' | 'lg';
     fullWidth?: boolean;
     className?: string;
@@ -176,8 +176,8 @@ export const Tabs: React.FC<TabsProps> = ({
         const baseStyles = 'flex items-center gap-2 font-medium transition-all duration-300 focus:outline-none relative';
 
         const sizeStyles = {
-            sm: 'px-3 py-2 text-sm',
-            md: 'px-4 py-3 text-sm',
+            sm: 'px-3 py-1 text-sm',
+            md: 'px-4 py-2 text-sm',
             lg: 'px-6 py-4 text-base'
         };
 
@@ -193,6 +193,10 @@ export const Tabs: React.FC<TabsProps> = ({
             underline: {
                 inactive: 'text-gray-600 hover:text-gray-800 pb-3 hover:bg-gray-50/50 rounded-t transition-colors focus-visible:ring-2 focus-visible:ring-[#01AB79]/20 focus-visible:ring-offset-1',
                 active: 'text-[#01AB79] pb-3 font-semibold'
+            },
+            toggle: {
+                inactive: 'text-[#8C8C93] hover:text-[#DEDEE3] rounded-md transition-colors px-4 py-2.5',
+                active: 'bg-[#DEDEE3] text-[#1C1C1E] rounded-md font-medium px-4 py-2.5'
             }
         };
 
@@ -209,11 +213,12 @@ export const Tabs: React.FC<TabsProps> = ({
         const variantStyles = {
             default: 'bg-white',
             pills: 'bg-gray-100 p-1 rounded-lg',
-            underline: ''
+            underline: '',
+            toggle: 'bg-[#2C2C2E] p-1 rounded-lg gap-1'
         };
 
         const widthStyles = fullWidth ? 'w-full' : '';
-        const spacingStyles = variant === 'pills' ? 'space-x-1' : 'space-x-0';
+        const spacingStyles = variant === 'pills' || variant === 'toggle' ? 'space-x-1' : 'space-x-0';
 
         return `${baseStyles} ${variantStyles[variant]} ${widthStyles} ${spacingStyles} ${tabListClassName}`;
     };

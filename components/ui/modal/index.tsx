@@ -87,7 +87,7 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal Content */}
       <div
         className={cn(
-          'relative bg-[#1C1C1E] border border-[#313135BA] rounded-xl shadow-lg transition-all duration-200 ease-out transform',
+          'relative bg-[#19191B] border border-[#28282A] rounded-xl shadow-lg transition-all duration-200 ease-out transform',
           'animate-in fade-in-0 zoom-in-95',
           sizeClasses[size],
           'max-h-[95vh] sm:max-h-[90vh] overflow-hidden',
