@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { PermissionProvider } from "@/lib/contexts/PermissionContext";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
@@ -30,9 +31,10 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          {children}
-          <Toaster 
+        <PermissionProvider>
+          <AuthProvider>
+            {children}
+            <Toaster 
             position="top-right"
             toastOptions={{
               duration: 4000,
@@ -56,7 +58,8 @@ export default function RootLayout({
               },
             }}
           />
-        </AuthProvider>
+          </AuthProvider>
+        </PermissionProvider>
       </body>
     </html>
   );

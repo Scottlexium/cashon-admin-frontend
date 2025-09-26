@@ -50,8 +50,8 @@ class AuthService {
       const token = this.getToken();
       if (!token) return null;
 
-      const response = await api.get<ApiResponse<User>>('/profile');
-      return response.data.data;
+      const response = await api.get<User>('/profile');
+      return response.data;
     } catch (error) {
       console.error('Get current user error:', error);
       return null;

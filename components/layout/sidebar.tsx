@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/lib/store/useAuthStore';
+import { usePermissions } from '@/lib/contexts/PermissionContext';
 import { navigation } from '@/lib/navigation';
 import { LogoutIcon } from '@/components/icons';
 
 export function Sidebar() {
   const pathname = usePathname();
   const { logout, user } = useAuthStore();
+  const { hasPermission } = usePermissions();
 
   const handleLogout = async () => {
     try {
@@ -23,7 +25,10 @@ export function Sidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col bg-[#151517]">
-      <div className='flex items-center gap-2 px-4 py-2 justify-between bg-[#1F20238F] w-[90%] rounded-[11px] mx-auto mt-4'>
+      <Link 
+        href="/dashboard/profile"
+        className='flex items-center gap-2 px-4 py-2 justify-between bg-[#1F20238F] w-[90%] rounded-[11px] mx-auto mt-4 hover:bg-[#2A2A2D] transition-colors cursor-pointer'
+      >
         <div className='space-y-2'>
           <p className="text-sm font-semibold text-white">{user?.name}</p>
           <p className="text-xs font-medium text-[#A2A2A7]">{user?.email}</p>
@@ -31,13 +36,18 @@ export function Sidebar() {
         <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M1.00005 1C1.00005 1 7 5.4189 7 7C7 8.5812 1 13 1 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      </div>
+      </Link>
 
 
       {/* Navigation */}
       <nav className="flex flex-1 flex-col px-4 pb-4 mt-5">
         <ul role="list" className="flex flex-1 flex-col gap-y-1">
           {navigation.map((item) => {
+            // Check permissions for the navigation item
+            if (item.permission && !hasPermission(item.permission)) {
+              return null; // Hide menu item if user lacks permission
+            }
+
             // Special handling for dashboard to match both /dashboard and /dashboard/overview, just minor stuff to make sure overview is dashboard index
             const isActive = item.href === '/dashboard'
               ? (pathname === '/dashboard' || pathname === '/dashboard/overview' || pathname.startsWith('/dashboard/overview/'))

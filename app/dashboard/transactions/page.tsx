@@ -1,16 +1,56 @@
 "use client";
 import { Metrics, MetricsItem } from '@/components/ui/metrics';
-import { DataTable } from '@/components/ui/table';
+import { DataTable, TableColumn } from '@/components/ui/table';
 import { Button } from '@/components/ui/button/button';
 import { Input } from '@/components/ui/input';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import { ReceiptIcon } from '@/components/icons';
+import { TransactionsResponse, TransactionRecord } from './types';
+import { formatCurrency, formatDateTime, extractPaginatedData, getPaginationInfo } from '@/lib/utils';
+import { ApiPaginationInfo } from '@/lib/types';
+import api from '@/lib/api';
 
 const Page = () => {
+    const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [pagination, setPagination] = useState<ApiPaginationInfo | undefined>(undefined);
+    const [stats, setStats] = useState<TransactionsResponse['stats']>({
+        total: 0,
+        total_deposit: 0,
+        total_withdrawal: 0,
+        wallet: null
+    });
+
+    useEffect(() => {
+        fetchTransactions();
+    }, []);
+
+    const fetchTransactions = async (page: number = 1, limit: number = 10) => {
+        try {
+            setLoading(true);
+            const response = await api.get<TransactionsResponse>(`/alltransaction?page=${page}&limit=${limit}`);
+            
+            // Extract data and pagination info using utility functions
+            const { data, pagination: paginationInfo } = extractPaginatedData<TransactionsResponse>(response);
+            
+            if (data) {
+                setStats(data.stats);
+                setTransactions(data.table);
+                setPagination(paginationInfo || undefined);
+            }
+        } catch (err) {
+            setError('Failed to fetch transactions');
+            console.error('Error fetching transactions:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const statsData: MetricsItem[] = [
         {
             title: 'Total Deposits',
-            value: 5000000.00,
+            value: stats.total_deposit,
             icon: <>
                 <svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect y="0.5" width="10" height="10" rx="3" fill="#65A3FF" />
@@ -23,7 +63,7 @@ const Page = () => {
         },
         {
             title: 'Total Withdrawals',
-            value: 5000000.00,
+            value: stats.total_withdrawal,
             icon: <>
                 <svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect y="0.5" width="10" height="10" rx="3" fill="#E697FF" />
@@ -36,8 +76,8 @@ const Page = () => {
             },
         },
         {
-            title: 'Pending Transactions',
-            value: 400,
+            title: 'Total Transactions',
+            value: stats.total,
             icon: <>
                 <svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect y="0.5" width="10" height="10" rx="2.5" fill="#ECA450" />
@@ -50,186 +90,80 @@ const Page = () => {
             },
         },
         {
-            title: 'Failed Transactions',
-            value: 45,
+            title: 'Wallet Balance',
+            value: stats.wallet ? parseFloat(stats.wallet.balance) : 0,
             icon: <>
                 <svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect y="0.5" width="10" height="10" rx="2.5" fill="#FF7272" />
+                    <rect y="0.5" width="10" height="10" rx="2.5" fill="#00FFB3" />
                 </svg>
 
             </>,
             change: {
-                value: '9.3%',
-                type: 'decrease' as const,
+                value: '2.1%',
+                type: 'increase' as const,
             },
         },
     ];
 
-    // Transactions table data
-    const transactionsTableData = [
-        {
-            id: '2874829372',
-            user: 'Daniel Owolabi',
-            type: 'Deposit',
-            status: 'Completed',
-            amount: 10000.00,
-            date: '08 Aug 2025, 14:32'
-        },
-        {
-            id: '4764829013',
-            user: 'Jane Doe',
-            type: 'Withdrawal',
-            status: 'Pending',
-            amount: 3000.00,
-            date: '08 Aug 2025, 09:15'
-        },
-        {
-            id: '4764829013',
-            user: 'Will Smith',
-            type: 'Deposit',
-            status: 'Failed',
-            amount: 3000.00,
-            date: '10 Aug 2025, 11:47'
-        },
-        {
-            id: '4764829013',
-            user: 'Annalise Keating',
-            type: 'Deposit',
-            status: 'Completed',
-            amount: 3000.00,
-            date: '11 Aug 2025, 16:32'
-        },
-        {
-            id: '4764829013',
-            user: 'Michael Scott',
-            type: 'Withdrawal',
-            status: 'Completed',
-            amount: 3000.00,
-            date: '12 Aug 2025, 12:03'
-        },
-        {
-            id: '4764829013',
-            user: 'Sherlock Holmes',
-            type: 'Withdrawal',
-            status: 'Completed',
-            amount: 3000.00,
-            date: '13 Aug 2025, 08:45'
-        },
-        {
-            id: '4764829013',
-            user: 'Deandra Tenpenny',
-            type: 'Deposit',
-            status: 'Completed',
-            amount: 3000.00,
-            date: '14 Aug 2025, 19:30'
-        },
-        {
-            id: '4764829013',
-            user: 'Tony Stark',
-            type: 'Withdrawal',
-            status: 'Completed',
-            amount: 3000.00,
-            date: '15 Aug 2025, 07:50'
-        },
-        {
-            id: '4764829013',
-            user: 'Elizabeth Bennet',
-            type: 'Deposit',
-            status: 'Completed',
-            amount: 3000.00,
-            date: '16 Aug 2025, 15:11'
-        },
-        {
-            id: '4764829013',
-            user: 'Gandalf the Gray',
-            type: 'Deposit',
-            status: 'Completed',
-            amount: 3000.00,
-            date: '17 Aug 2025, 10:05'
-        },
-        {
-            id: '4764829013',
-            user: 'Hermione Granger',
-            type: 'Withdrawal',
-            status: 'Completed',
-            amount: 3000.00,
-            date: '18 Aug 2025, 13:40'
-        }
-    ];
 
-    // Table columns configuration
-    const transactionsTableColumns = [
+    // Table columns configuration using new column types
+    const transactionsTableColumns: TableColumn<TransactionRecord>[] = [
         {
             key: 'id',
-            header: 'TRANSACTION ID',
-            accessor: 'id' as const,
+            header: 'REFERENCE',
+            accessor: 'id',
+            type: 'text',
             width: '180px',
-            render: (value: string) => (
-                <span className="text-[#DEDEE3] font-mono text-sm">{value}</span>
-            )
+            copyable: true,
+            truncate: 20,
+            className: 'font-mono text-[#DEDEE3]'
         },
         {
             key: 'user',
-            header: 'USER',
-            accessor: 'user' as const,
-            width: '200px',
-            render: (value: string) => (
-                <span className="text-[#DEDEE3] text-sm">{value}</span>
-            )
+            header: 'USER ID',
+            accessor: 'user_id',
+            type: 'text',
+            width: '120px',
+            className: 'text-[#DEDEE3]'
         },
         {
             key: 'type',
             header: 'TYPE',
-            accessor: 'type' as const,
-            width: '120px',
-            render: (value: string) => (
-                <span className="text-[#8C8C93] text-sm">{value}</span>
-            )
+            accessor: 'type',
+            type: 'status',
+            width: '120px'
         },
         {
-            key: 'status',
-            header: 'STATUS',
-            accessor: 'status' as const,
-            width: '150px',
-            render: (value: string) => {
-                const statusColors = {
-                    'Completed': 'text-green-400',
-                    'Pending': 'text-orange-400',
-                    'Failed': 'text-red-400'
-                };
-                const dotColors = {
-                    'Completed': 'bg-green-400',
-                    'Pending': 'bg-orange-400',
-                    'Failed': 'bg-red-400'
-                };
-                return (
-                    <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${dotColors[value as keyof typeof dotColors]}`}></div>
-                        <span className={`text-sm ${statusColors[value as keyof typeof statusColors]}`}>
-                            {value}
-                        </span>
-                    </div>
-                );
-            }
+            key: 'source',
+            header: 'SOURCE',
+            accessor: 'source',
+            type: 'text',
+            width: '120px',
+            className: 'text-[#8C8C93] capitalize'
         },
         {
             key: 'amount',
             header: 'AMOUNT',
-            accessor: 'amount' as const,
+            accessor: 'amount',
+            type: 'currency',
             width: '150px',
-            align: 'right' as const,
-            render: (value: number) => (
-                <span className="text-[#DEDEE3] text-sm">₦{value.toLocaleString()}.00</span>
-            )
+            currency: 'NGN',
+            className: 'text-[#DEDEE3]'
+        },
+        {
+            key: 'new_balance',
+            header: 'NEW BALANCE',
+            accessor: 'new_balance',
+            type: 'currency',
+            currency: 'NGN',
+            className: 'text-[#8C8C93]'
         },
         {
             key: 'date',
             header: 'DATE',
-            accessor: 'date' as const,
-            width: '180px',
-            render: (value: string) => (
-                <span className="text-[#8C8C93] text-sm">{value}</span>
-            )
+            accessor: 'created_at',
+            type: 'datetime',
+            className: 'text-[#8C8C93]'
         }
     ];
 
@@ -265,7 +199,14 @@ const Page = () => {
                                 <ReceiptIcon className="w-5 h-5 text-[#8C8C93]" />
                             </div>
                             <div>
-                                <h2 className="text-lg font-medium text-[#DEDEE3]">Transactions (15,000)</h2>
+                                <h2 className="text-lg font-medium text-[#DEDEE3]">
+                                    Transactions ({loading ? '...' : transactions.length.toLocaleString()})
+                                </h2>
+                                {pagination && (
+                                    <p className="text-xs text-[#8C8C93] mt-1">
+                                        Page {pagination.currentPage} of {pagination.totalPages} • {pagination.totalItems} total items
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -329,12 +270,33 @@ const Page = () => {
                     </div>
 
                     {/* Table */}
-                    <DataTable
-                        data={transactionsTableData}
-                        columns={transactionsTableColumns}
-                        variant="dark"
-                        className="animate-in fade-in duration-700 delay-400"
-                    />
+                    {loading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00FFB3]"></div>
+                        </div>
+                    ) : error ? (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <div className="text-red-400 mb-2">⚠️ {error}</div>
+                            <Button 
+                                onClick={() => fetchTransactions()}
+                                variant="filled"
+                                size="sm"
+                                className="bg-[#00FFB3] text-black hover:bg-[#00FFB3]/90"
+                            >
+                                Retry
+                            </Button>
+                        </div>
+                    ) : (
+                        <DataTable
+                            data={transactions}
+                            columns={transactionsTableColumns}
+                            variant="dark"
+                            className="animate-in fade-in duration-700 delay-400"
+                            pagination={pagination}
+                            onPageChange={(page: number) => fetchTransactions(page, pagination?.limit || 10)}
+                            showPagination={true}
+                        />
+                    )}
                 </div>
             </div>
         </div>

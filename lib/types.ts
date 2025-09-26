@@ -5,14 +5,26 @@ export interface Department {
   status: string;
 }
 
+export interface ApiPaginationInfo {
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  limit: number;
+}
+
+export interface ApiPaginatedResponse<T> {
+  data: T;
+  pagination: ApiPaginationInfo;
+}
+
 export interface User {
   id: number;
   name: string;
   username: string;
   email: string;
   phone?: string;
-  role: 'admin' | 'manager' | 'user' | 'moderator';
-  status: 'active' | 'inactive';
+  role: string;
+  status: string;
   has_temp_password: 0 | 1;
   login_time?: string;
   departments?: Department[];
@@ -35,8 +47,8 @@ export interface LoginResponse {
   name: string;
   username: string;
   email: string;
-  role: 'admin' | 'manager' | 'user' | 'moderator';
-  status: 'active' | 'inactive';
+  role: string;
+  status: string;
   has_temp_password: 0 | 1;
   token: string;
 }

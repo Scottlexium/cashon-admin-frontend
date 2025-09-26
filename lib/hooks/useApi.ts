@@ -34,7 +34,7 @@ export function useApi<T = any>(
         setError(null);
 
         const response = await apiCall(...args);
-        const responseData = response.data.data || response.data;
+        const responseData = response.data;
         
         setData(responseData);
 

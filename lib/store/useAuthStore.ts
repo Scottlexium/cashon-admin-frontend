@@ -32,8 +32,8 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true }, false, 'login:start');
         
         try {
-          const response = await api.post<ApiResponse<LoginResponse>>('/login', credentials);
-          const loginData = response.data.data;
+          const response = await api.post<LoginResponse>('/login', credentials);
+          const loginData = response.data;
           
           if (loginData?.token) {
             // Encrypt and store auth token in cookies
@@ -46,22 +46,35 @@ export const useAuthStore = create<AuthStore>()(
               expires: 7 // 7 days
             });
 
-            // Create user object from login response (only basic fields)
-            const user: User = {
-              id: loginData.id,
-              name: loginData.name,
-              username: loginData.username,
-              email: loginData.email,
-              role: loginData.role,
-              status: loginData.status,
-              has_temp_password: loginData.has_temp_password,
-            };
+            // After storing the token, fetch the complete user profile
+            try {
+              const profileResponse = await api.get<User>('/profile');
+              const user = profileResponse.data;
+              
+              set({ 
+                user: user || null, 
+                isAuthenticated: !!user, 
+                isLoading: false 
+              }, false, 'login:success');
+            } catch (profileError) {
+              console.error('Failed to fetch user profile after login:', profileError);
+              // If profile fetch fails, use basic user data from login response
+              const user: User = {
+                id: loginData.id,
+                name: loginData.name,
+                username: loginData.username,
+                email: loginData.email,
+                role: loginData.role,
+                status: loginData.status,
+                has_temp_password: loginData.has_temp_password,
+              };
 
-            set({ 
-              user, 
-              isAuthenticated: true, 
-              isLoading: false 
-            }, false, 'login:success');
+              set({ 
+                user, 
+                isAuthenticated: true, 
+                isLoading: false 
+              }, false, 'login:fallback');
+            }
           } else {
             throw new Error('No token received from server');
           }
@@ -110,8 +123,8 @@ export const useAuthStore = create<AuthStore>()(
           // Decrypt token before using it
           const token = await decryptToken(encryptedToken);
           
-          const response = await api.get<ApiResponse<User>>('/profile');
-          const user = response.data.data;
+          const response = await api.get<User>('/profile');
+          const user = response.data;
           
           set({ 
             user: user || null, 

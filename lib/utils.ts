@@ -169,3 +169,22 @@ export async function decryptToken(encryptedToken: string): Promise<string> {
     return encryptedToken; // Fallback to treating as unencrypted
   }
 }
+
+// Pagination utility functions
+export function isPaginatedResponse(response: any): response is { data: any; pagination: import('./types').ApiPaginationInfo } {
+  return response && typeof response === 'object' && 'pagination' in response && 'data' in response;
+}
+
+export function extractPaginatedData<T>(response: any): { data: T; pagination?: import('./types').ApiPaginationInfo } {
+  if (isPaginatedResponse(response)) {
+    return { data: response.data as T, pagination: response.pagination };
+  }
+  return { data: response as T };
+}
+
+export function getPaginationInfo(response: any): import('./types').ApiPaginationInfo | null {
+  if (isPaginatedResponse(response)) {
+    return response.pagination;
+  }
+  return null;
+}
