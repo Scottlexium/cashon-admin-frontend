@@ -482,7 +482,7 @@ const AutomationsPage = () => {
                                     label: 'Email',
                                     icon: (
                                         <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g clip-path="url(#clip0_2340_3226)">
+                                            <g clipPath="url(#clip0_2340_3226)">
                                                 <path d="M2.5 6.33366C2.5 5.89163 2.67559 5.46771 2.98816 5.15515C3.30072 4.84259 3.72464 4.66699 4.16667 4.66699H15.8333C16.2754 4.66699 16.6993 4.84259 17.0118 5.15515C17.3244 5.46771 17.5 5.89163 17.5 6.33366V14.667C17.5 15.109 17.3244 15.5329 17.0118 15.8455C16.6993 16.1581 16.2754 16.3337 15.8333 16.3337H4.16667C3.72464 16.3337 3.30072 16.1581 2.98816 15.8455C2.67559 15.5329 2.5 15.109 2.5 14.667V6.33366Z" stroke="#6C6C72" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
                                                 <path d="M2.5 6.33301L10 11.333L17.5 6.33301" stroke="#6C6C72" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
                                             </g>
@@ -500,7 +500,7 @@ const AutomationsPage = () => {
                                     label: 'Push Notification',
                                     icon: (
                                         <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g clip-path="url(#clip0_2340_3236)">
+                                            <g clipPath="url(#clip0_2340_3236)">
                                                 <path d="M5 4.66667C5 4.22464 5.17559 3.80072 5.48816 3.48816C5.80072 3.17559 6.22464 3 6.66667 3H13.3333C13.7754 3 14.1993 3.17559 14.5118 3.48816C14.8244 3.80072 15 4.22464 15 4.66667V16.3333C15 16.7754 14.8244 17.1993 14.5118 17.5118C14.1993 17.8244 13.7754 18 13.3333 18H6.66667C6.22464 18 5.80072 17.8244 5.48816 17.5118C5.17559 17.1993 5 16.7754 5 16.3333V4.66667Z" stroke="#6C6C72" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
                                                 <path d="M9.16602 3.83301H10.8327" stroke="#6C6C72" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
                                                 <path d="M10 14.667V14.6757" stroke="#6C6C72" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
@@ -519,7 +519,7 @@ const AutomationsPage = () => {
                                     label: 'SMS',
                                     icon: (
                                         <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g clip-path="url(#clip0_2340_3245)">
+                                            <g clipPath="url(#clip0_2340_3245)">
                                                 <path d="M6.66699 8H13.3337" stroke="#6C6C72" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
                                                 <path d="M6.66602 11.333H11.666" stroke="#6C6C72" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
                                                 <path d="M15 3.83301C15.663 3.83301 16.2989 4.0964 16.7678 4.56524C17.2366 5.03408 17.5 5.66997 17.5 6.33301V12.9997C17.5 13.6627 17.2366 14.2986 16.7678 14.7674C16.2989 15.2363 15.663 15.4997 15 15.4997H10.8333L6.66667 17.9997V15.4997H5C4.33696 15.4997 3.70107 15.2363 3.23223 14.7674C2.76339 14.2986 2.5 13.6627 2.5 12.9997V6.33301C2.5 5.66997 2.76339 5.03408 3.23223 4.56524C3.70107 4.0964 4.33696 3.83301 5 3.83301H15Z" stroke="#6C6C72" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />

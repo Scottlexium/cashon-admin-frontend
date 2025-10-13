@@ -171,13 +171,14 @@ export async function decryptToken(encryptedToken: string): Promise<string> {
 }
 
 // Pagination utility functions
-export function isPaginatedResponse(response: any): response is { data: any; pagination: import('./types').ApiPaginationInfo } {
-  return response && typeof response === 'object' && 'pagination' in response && 'data' in response;
+export function isPaginatedResponse<T>(data: any): data is T & { pagination: import('./types').ApiPaginationInfo } {
+  return data && typeof data === 'object' && 'pagination' in data;
 }
 
 export function extractPaginatedData<T>(response: any): { data: T; pagination?: import('./types').ApiPaginationInfo } {
   if (isPaginatedResponse(response)) {
-    return { data: response.data as T, pagination: response.pagination };
+    const { pagination, ...data } = response;
+    return { data: data as T, pagination };
   }
   return { data: response as T };
 }

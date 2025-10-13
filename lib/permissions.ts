@@ -1,19 +1,19 @@
 import api from './api';
 
-// Permission type - permissions will come from API
+
 export type Permission = string;
 
-// API-based role and permission interfaces
+
 interface ApiRole {
   key: string;
   label: string;
   permissions: string[];
 }
 
-// Global variable to store API roles data
+
 let apiRoles: ApiRole[] = [];
 
-// Permission checking utilities
+
 export const hasPermission = (userPermissions: Permission[], requiredPermission: Permission): boolean => {
   return userPermissions.includes(requiredPermission);
 };
@@ -26,7 +26,6 @@ export const hasAllPermissions = (userPermissions: Permission[], requiredPermiss
   return requiredPermissions.every(permission => userPermissions.includes(permission));
 };
 
-// Fetch roles from your API using axios instance
 export const fetchRoles = async (): Promise<ApiRole[]> => {
   try {
     console.log('Fetching roles from API...');
@@ -42,7 +41,6 @@ export const fetchRoles = async (): Promise<ApiRole[]> => {
     }
   } catch (error) {
     console.error('Failed to fetch roles from API:', error);
-    // Log more details about the error
     if (error instanceof Error) {
       console.error('Error message:', error.message);
     }
@@ -50,9 +48,9 @@ export const fetchRoles = async (): Promise<ApiRole[]> => {
   return [];
 };
 
-// Get permissions for a specific role
+
 export const getRolePermissions = (roleName: string): Permission[] => {
-  // Check if we have API roles data
+
   if (apiRoles.length > 0) {
     const apiRole = apiRoles.find(r => r.key === roleName);
     if (apiRole) {
@@ -60,7 +58,7 @@ export const getRolePermissions = (roleName: string): Permission[] => {
     }
   }
   
-  // If no API data or role not found, return empty permissions
+
   console.warn(`Role '${roleName}' not found in API data. Available roles:`, apiRoles.map(r => r.key));
   return [];
 };

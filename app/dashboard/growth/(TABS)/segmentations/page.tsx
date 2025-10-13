@@ -54,9 +54,7 @@ const SegmentationsPage = () => {
     };
 
     const handleCreateSegment = (segmentData: any) => {
-        // Handle segment creation logic here
         console.log('Creating segment:', segmentData);
-        // Add the segment to your data or make an API call
     };
 
     const handleSubmitSegment = () => {
@@ -67,7 +65,6 @@ const SegmentationsPage = () => {
     };
 
     const handleCloseModal = () => {
-        // Reset form data
         setFormData({
             segmentName: '',
             savingPlanStatusEnabled: true,

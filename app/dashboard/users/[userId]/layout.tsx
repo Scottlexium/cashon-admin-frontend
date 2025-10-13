@@ -2,7 +2,8 @@
 import DetailPageHeader from '@/components/layout/DetailPageHeader';
 import { Tabs } from '@/components/ui/tabs';
 import { useParams } from 'next/navigation';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import moment from 'moment';
 import ProfileContent from './(TABS)/Profile/page';
 import SavingsPlanContent from './(TABS)/Savings-plan/page';
 import BoostAndInterestContent from './(TABS)/boost-interest/page';
@@ -14,19 +15,123 @@ interface ComplianceLayoutProps {
     children: React.ReactNode;
 }
 
+interface UserData {
+    id: number;
+    phone: string;
+    email: string;
+    profile_picture: string | null;
+    first_name: string;
+    last_name: string;
+    dob: string;
+    verification_type: string | null;
+    verification_number: string | null;
+    verification_status: string;
+    document_type: string | null;
+    document_path: string | null;
+    scan_path: string | null;
+    login_alert_email: boolean;
+    transaction_alert_email: boolean;
+    transaction_alert_push: boolean;
+    referral_code: string | null;
+    phone_verified_at: string | null;
+    email_verified_at: string | null;
+    last_device_name: string | null;
+    last_device_type: string | null;
+    last_device_ip: string | null;
+    last_device_verified_at: string | null;
+    created_at: string;
+    updated_at: string;
+    referred_by: number | null;
+    total_referrals: number;
+    referral_earnings: string;
+    referral_status: string;
+    referral_code_generated_at: string | null;
+    first_referral_at: string | null;
+    profile: string | null;
+    address: string | null;
+    wallet: Wallet;
+}
+
+interface Wallet {
+    id: number;
+    user_id: number;
+    type: string;
+    balance: string;
+    available_balance: string;
+    lien_balance: string;
+    currency: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export default function ComplianceLayout({ children }: ComplianceLayoutProps) {
     const params = useParams();
     const userId = params.userId as string;
+    const [userData, setUserData] = useState<UserData | null>(null);
 
-    // User data
-    const userDetails = {
-        name: 'Scott Lexium',
-        userId: 'UM-024398',
-        tier: 1,
-        totalBalance: 5460,
-        email: 'scott.lexium@example.com',
-        phone: '+234 806 789 5432',
-        dateJoined: 'Oct 24, 2024, 5:50pm'
+    // Load user data from sessionStorage when component mounts
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUserData = sessionStorage.getItem('selectedUserData');
+            console.log('Raw stored data:', storedUserData); // Debug log
+            if (storedUserData) {
+                try {
+                    const parsedData = JSON.parse(storedUserData);
+                    setUserData(parsedData);
+                    console.log('✅ Successfully loaded user data:', parsedData); // Debug log
+                } catch (error) {
+                    console.error('❌ Error parsing stored user data:', error);
+                }
+            } else {
+                console.warn('⚠️ No user data found in sessionStorage - user may have navigated directly to this page');
+            }
+        }
+    }, []);
+
+    // Debug log to show current state
+    useEffect(() => {
+        console.log('👤 Current userData state:', userData);
+        console.log('🔧 Current userId from params:', userId);
+    }, [userData, userId]);
+
+    // Dynamic badge based on verification status
+    const getBadge = () => {
+        const status = userData?.verification_status || 'Unknown';
+        console.log('🏷️ Badge status:', status); // Debug log
+
+        const statusConfig = {
+            'Completed': {
+                color: '#3AF4BD',
+                text: 'Verified',
+                bgColor: '#212123'
+            },
+            'Pending': {
+                color: '#FFA500',
+                text: 'Pending',
+                bgColor: '#212123'
+            },
+            'Failed': {
+                color: '#FF6B6B',
+                text: 'Failed',
+                bgColor: '#212123'
+            },
+            'Unknown': {
+                color: '#8C8C93',
+                text: 'Unknown',
+                bgColor: '#212123'
+            }
+        };
+
+        const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['Unknown'];
+
+        return (
+            <span className={`rounded-[9px] flex p-2 items-center gap-1 px-4`} style={{ backgroundColor: config.bgColor }}>
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.43701 0.0871199L5.49876 0.0833282L5.56267 0.0871199L5.59463 0.0914533L5.62767 0.098495L5.6878 0.116912C5.72933 0.132221 5.76881 0.152597 5.80534 0.177578L5.86167 0.221995L5.9998 0.340078C7.09251 1.24768 8.47352 1.73503 9.89384 1.71429L10.0791 1.70887C10.2002 1.70334 10.3197 1.73861 10.4184 1.80902C10.5171 1.87944 10.5893 1.98093 10.6235 2.09724C10.8896 3.00268 10.9711 3.95239 10.863 4.88993C10.7549 5.82746 10.4594 6.7337 9.99413 7.5548C9.52886 8.37589 8.90329 9.09507 8.15458 9.66962C7.40587 10.2442 6.54931 10.6624 5.6358 10.8993C5.54664 10.9224 5.45305 10.9224 5.36388 10.8993C4.45032 10.6624 3.5937 10.2443 2.84493 9.66975C2.09617 9.09523 1.47054 8.37605 1.00521 7.55495C0.53989 6.73385 0.244374 5.82759 0.136228 4.89003C0.0280806 3.95246 0.109509 3.00272 0.375674 2.09724C0.409859 1.98093 0.482079 1.87944 0.580775 1.80902C0.679471 1.73861 0.798936 1.70334 0.920049 1.70887C2.40284 1.77665 3.85754 1.28853 4.99934 0.340078L5.1418 0.218203L5.1938 0.177578C5.23034 0.152597 5.26981 0.132221 5.31134 0.116912L5.37201 0.098495C5.39324 0.0933674 5.41531 0.0895683 5.43701 0.0871199Z" fill={config.color} />
+                </svg>
+                <p className='font-medium text-sm' style={{ color: config.color }}>{config.text}</p>
+            </span>
+        );
     };
 
     // Create tabs with direct content
@@ -59,22 +164,17 @@ export default function ComplianceLayout({ children }: ComplianceLayoutProps) {
         {
             id: 'compliance',
             label: 'Compliance',
-            content: <ComplianceContent/>
+            content: <ComplianceContent />
         }
     ];
 
     return (
         <div className="h-full">
             <DetailPageHeader
-                breadcrumbText="Operations / Merchants"
-                breadcrumbHref="/dashboard/compliance"
-                name={userDetails.name}
-                badge={<span className='bg-[#212123] rounded-[9px] flex p-2 items-center gap-1 px-4'>
-                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5.43701 0.0871199L5.49876 0.0833282L5.56267 0.0871199L5.59463 0.0914533L5.62767 0.098495L5.6878 0.116912C5.72933 0.132221 5.76881 0.152597 5.80534 0.177578L5.86167 0.221995L5.9998 0.340078C7.09251 1.24768 8.47352 1.73503 9.89384 1.71429L10.0791 1.70887C10.2002 1.70334 10.3197 1.73861 10.4184 1.80902C10.5171 1.87944 10.5893 1.98093 10.6235 2.09724C10.8896 3.00268 10.9711 3.95239 10.863 4.88993C10.7549 5.82746 10.4594 6.7337 9.99413 7.5548C9.52886 8.37589 8.90329 9.09507 8.15458 9.66962C7.40587 10.2442 6.54931 10.6624 5.6358 10.8993C5.54664 10.9224 5.45305 10.9224 5.36388 10.8993C4.45032 10.6624 3.5937 10.2443 2.84493 9.66975C2.09617 9.09523 1.47054 8.37605 1.00521 7.55495C0.53989 6.73385 0.244374 5.82759 0.136228 4.89003C0.0280806 3.95246 0.109509 3.00272 0.375674 2.09724C0.409859 1.98093 0.482079 1.87944 0.580775 1.80902C0.679471 1.73861 0.798936 1.70334 0.920049 1.70887C2.40284 1.77665 3.85754 1.28853 4.99934 0.340078L5.1418 0.218203L5.1938 0.177578C5.23034 0.152597 5.26981 0.132221 5.31134 0.116912L5.37201 0.098495C5.39324 0.0933674 5.41531 0.0895683 5.43701 0.0871199Z" fill="#3AF4BD" />
-                    </svg>
-                    <p className='font-medium text-sm text-[#3AF4BD]'>Verified</p>
-                </span>}
+                breadcrumbText="Operations / Users"
+                breadcrumbHref="/dashboard/users"
+                name={userData?.first_name && userData?.last_name ? `${userData.first_name} ${userData.last_name}` : 'N/A'}
+                badge={getBadge()}
                 fields={[
                     {
                         icon: <>
@@ -83,7 +183,7 @@ export default function ComplianceLayout({ children }: ComplianceLayoutProps) {
                             </svg>
                         </>,
                         label: "User ID",
-                        value: userDetails.userId,
+                        value: userData?.id ? userData.id.toString() : 'N/A',
                         key: "userId"
                     },
                     {
@@ -103,7 +203,7 @@ export default function ComplianceLayout({ children }: ComplianceLayoutProps) {
                             </svg>
                         </>,
                         label: "Date Joined",
-                        value: userDetails.dateJoined,
+                        value: userData?.created_at ? moment(userData.created_at).format('DD MMM, YYYY') : 'N/A',
                         key: "dateJoined"
                     },
                     {
@@ -113,7 +213,7 @@ export default function ComplianceLayout({ children }: ComplianceLayoutProps) {
                             </svg>
                         </>,
                         label: "Phone Number",
-                        value: userDetails.phone,
+                        value: userData?.phone || 'N/A',
                         key: "phone"
                     },
                     {
@@ -130,13 +230,13 @@ export default function ComplianceLayout({ children }: ComplianceLayoutProps) {
                         </svg>
                         </>,
                         label: "Email Address",
-                        value: userDetails.email,
+                        value: userData?.email || 'N/A',
                         key: "email"
                     }
                 ]}
                 rightContent={{
                     label: "TOTAL BALANCE",
-                    value: `$${userDetails.totalBalance.toLocaleString()}`
+                    value: `$${userData?.wallet.balance.toLocaleString() || 'N/A'}`
                 }}
             />
 

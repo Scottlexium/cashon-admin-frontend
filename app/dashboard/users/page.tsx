@@ -1,55 +1,114 @@
 "use client";
 import { Metrics } from '@/components/ui/metrics';
 import { Chart } from '@/components/ui/charts';
-import { DataTable } from '@/components/ui/table';
+import { DataTable, TableColumn } from '@/components/ui/table';
 import { Button } from '@/components/ui/button/button';
 import { Input } from '@/components/ui/input';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { DatePicker, DateRange, RelativeRange } from '@/components/ui/calendar/date-picker';
 import { ReceiptIcon, UsersIcon } from '@/components/icons';
+import api, { ApiResponse } from '@/lib/api';
+import { ApiPaginationInfo } from '@/lib/types';
 import { CircularProgressChart, CircularProgressChartProps } from '@/components/ui/charts/circular-progress-chart';
-import  { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+interface UserResponse {
+  stats: {
+    total_users: number;
+    active_users: number;
+    pending_kyc: number;
+    flagged_accounts: number;
+  };
+  table: User[];
+}
+
+interface User {
+  id: number;
+  phone: string;
+  email: string;
+  profile_picture: string | null;
+  first_name: string;
+  last_name: string;
+  dob: string;
+  verification_type: string | null;
+  verification_number: string | null;
+  verification_status: string;
+  document_type: string | null;
+  document_path: string | null;
+  scan_path: string | null;
+  login_alert_email: boolean;
+  transaction_alert_email: boolean;
+  transaction_alert_push: boolean;
+  referral_code: string | null;
+  phone_verified_at: string | null;
+  email_verified_at: string | null;
+  last_device_name: string | null;
+  last_device_type: string | null;
+  last_device_ip: string | null;
+  last_device_verified_at: string | null;
+  created_at: string;
+  updated_at: string;
+  referred_by: number | null;
+  total_referrals: number;
+  referral_earnings: string;
+  referral_status: string;
+  referral_code_generated_at: string | null;
+  first_referral_at: string | null;
+  profile: string | null;
+  address: string | null;
+  wallet: Wallet;
+}
+
+interface Wallet {
+  id: number;
+  user_id: number;
+  type: string;
+  balance: string;
+  available_balance: string;
+  lien_balance: string;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ChartApiResponse {
+  user_growth: UserGrowth;
+  gauge_chart: GaugeChart;
+}
+
+interface UserGrowth {
+  chart_data: ChartData;
+  total_balance: string;       // string for decimal precision
+  selected_period: string;     // e.g. "6M", "1Y"
+}
+
+interface ChartData {
+  labels: string[];            // e.g. ["Y-m"]
+  datasets: Dataset[];
+}
+
+interface Dataset {
+  label: string;
+  data: number[];
+}
+
+interface GaugeChart {
+  current_value: number;
+  thresholds: {
+    low: number;
+    medium: number;
+    high: number;
+  };
+  percentage: number;
+  color_gradient: {
+    start: string;
+    end: string;
+  };
+}
+
 
 const Page = () => {
   const router = useRouter();
-  const statsData = [
-    {
-      title: 'Total Users',
-      value: 245890.00,
-      change: {
-        value: '12.5%',
-        type: 'increase' as const,
-      },
-      // icon: <WalletIcon />,
-    },
-    {
-      title: 'Active Users',
-      value: 124750.00,
-      change: {
-        value: '3.2%',
-        type: 'decrease' as const,
-      },
-      // icon: <LayersIcon />,
-    },
-    {
-      title: 'Pending KYC Approvals',
-      value: 1500,
-      change: {
-        value: '8.4%',
-        type: 'increase' as const,
-      },
-      // // icon: <DatabaseIcon />,
-    },
-    {
-      title: 'Flagged Accounts',
-      value: 32450.00,
-      change: {
-        value: '15.3%',
-        type: 'increase' as const,
-      },
-      // icon: <ReceiptIcon />,
-    },
-  ];
+
   const revenueData: CircularProgressChartProps["segments"] = [
     {
       label: 'Fees',
@@ -82,21 +141,18 @@ const Page = () => {
       percentage: 28.6
     }
   ]
-  // User growth chart data
-  const userGrowthData = [
-    { month: 'Jan', users: 85000, deposits: 45000, withdrawals: 35000 },
-    { month: 'Feb', users: 95000, deposits: 55000, withdrawals: 40000 },
-    { month: 'Mar', users: 88000, deposits: 50000, withdrawals: 38000 },
-    { month: 'Apr', users: 120000, deposits: 70000, withdrawals: 55000 },
-    { month: 'May', users: 145000, deposits: 85000, withdrawals: 65000 },
-    { month: 'Jun', users: 165000, deposits: 95000, withdrawals: 75000 },
-    { month: 'Jul', users: 190000, deposits: 110000, withdrawals: 85000 },
-    { month: 'Aug', users: 220000, deposits: 125000, withdrawals: 95000 },
-    { month: 'Sep', users: 245000, deposits: 140000, withdrawals: 105000 },
-    { month: 'Oct', users: 268000, deposits: 155000, withdrawals: 115000 },
-    { month: 'Nov', users: 285000, deposits: 165000, withdrawals: 125000 },
-    { month: 'Dec', users: 320000, deposits: 180000, withdrawals: 135000 },
-  ];
+  // User growth chart data - will be fetched from API
+  const [userGrowthData, setUserGrowthData] = useState<any[]>([]);
+  const [totalUsers, setTotalUsers] = useState<string>('2,563,975,897');
+  const [chartLoading, setChartLoading] = useState(true);
+
+  // Date range state
+  const [dateRange, setDateRange] = useState<DateRange | RelativeRange>({
+    label: 'Last 7 Days',
+    value: 'last-7-days'
+  });
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Chart formatters - defined outside JSX to avoid serialization issues
   const userChartFormatters = {
@@ -114,55 +170,180 @@ const Page = () => {
   };
 
   // Users table data
-  const usersTableData = [
+  const [usersTableData, setUsersTableData] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pagination, setPagination] = useState<ApiPaginationInfo | undefined>(undefined);
+  const [statsData, setStatsData] = useState([
     {
-      id: '2874829372',
-      name: 'Daniel Owolabi',
-      tier: 'Gold',
-      kycStatus: 'Completed',
-      totalBalance: 10000.00,
-      date: '08 Aug 2025, 14:32'
+      title: 'Total Users',
+      value: 0,
+      change: {
+        value: '0%',
+        type: 'increase' as 'increase' | 'decrease',
+      },
     },
     {
-      id: '4764829013',
-      name: 'Jane Doe',
-      tier: 'Silver',
-      kycStatus: 'Pending',
-      totalBalance: 3000.00,
-      date: '08 Aug 2025, 14:32'
+      title: 'Active Users',
+      value: 0,
+      change: {
+        value: '0%',
+        type: 'increase' as 'increase' | 'decrease',
+      },
     },
     {
-      id: '4764829013',
-      name: 'Will Smith',
-      tier: 'Bronze',
-      kycStatus: 'Failed',
-      totalBalance: 3000.00,
-      date: '08 Aug 2025, 14:32'
+      title: 'Pending KYC Approvals',
+      value: 0,
+      change: {
+        value: '0%',
+        type: 'increase' as 'increase' | 'decrease',
+      },
     },
     {
-      id: '4764829013',
-      name: 'Annalise Keating',
-      tier: 'Gold',
-      kycStatus: 'Completed',
-      totalBalance: 3000.00,
-      date: '08 Aug 2025, 14:32'
+      title: 'Flagged Accounts',
+      value: 0,
+      change: {
+        value: '0%',
+        type: 'increase' as 'increase' | 'decrease',
+      },
     },
-    {
-      id: '4764829013',
-      name: 'Michael Scott',
-      tier: 'Platinum',
-      kycStatus: 'Completed',
-      totalBalance: 3000.00,
-      date: '08 Aug 2025, 14:32'
+  ]);
+
+  // Fetch users data
+  useEffect(() => {
+    fetchUsers();
+    fetchChartData();
+  }, []);
+
+  // Fetch chart data when date range changes
+  useEffect(() => {
+    fetchChartData();
+  }, [dateRange]);
+
+  const fetchChartData = async () => {
+    try {
+      setChartLoading(true);
+
+      // Determine period parameter based on dateRange
+      let period = '12M'; // default
+      if ('value' in dateRange) {
+        switch (dateRange.value) {
+          case 'last-7-days':
+            period = '7D';
+            break;
+          case 'last-30-days':
+            period = '30D';
+            break;
+          case 'last-6-months':
+            period = '6M';
+            break;
+          case 'last-12-months':
+            period = '12M';
+            break;
+          default:
+            period = '12M';
+        }
+      }
+
+      const response = await api.get<ChartApiResponse>(`/api/user-charts?period=${period}`);
+
+      if (response.data && response.data.user_growth) {
+        const chartData = response.data.user_growth.chart_data;
+
+        // Transform the API data to match the existing chart format
+        const transformedData = chartData.labels.map((label, index) => ({
+          month: label,
+          users: chartData.datasets[0]?.data[index] || 0,
+          deposits: 0, // placeholder - you can add more datasets if needed
+          withdrawals: 0 // placeholder - you can add more datasets if needed
+        }));
+
+        setUserGrowthData(transformedData);
+
+        // Format total users number with commas
+        const totalBalance = response.data.user_growth.total_balance;
+        const formattedTotal = parseInt(totalBalance).toLocaleString();
+        setTotalUsers(formattedTotal);
+      }
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+      // Keep existing data on error or set empty array
+      setUserGrowthData([]);
+    } finally {
+      setChartLoading(false);
     }
-  ];
+  };
+
+  const fetchUsers = async (page: number = 1, limit: number = 10) => {
+    try {
+      setIsLoading(true);
+      const response = await api.get<UserResponse>(`/users?page=${page}&limit=${limit}`) as ApiResponse<UserResponse>;
+
+      console.log('API Response:', {
+        dataLength: response.data?.table?.length,
+        pagination: response.pagination,
+        requestedPage: page,
+        requestedLimit: limit
+      });
+
+      if (response.data) {
+        setUsersTableData(response.data.table || []);
+        setPagination(response.pagination || undefined);
+        
+        // Update stats from API response
+        if (response.data.stats) {
+          setStatsData([
+            {
+              title: 'Total Users',
+              value: response.data.stats.total_users,
+              change: {
+                value: '12.5%', // TODO: Calculate from API if available
+                type: 'increase' as 'increase' | 'decrease',
+              },
+            },
+            {
+              title: 'Active Users',
+              value: response.data.stats.active_users,
+              change: {
+                value: '3.2%', // TODO: Calculate from API if available
+                type: 'decrease' as 'increase' | 'decrease',
+              },
+            },
+            {
+              title: 'Pending KYC Approvals',
+              value: response.data.stats.pending_kyc,
+              change: {
+                value: '8.4%', // TODO: Calculate from API if available
+                type: 'increase' as 'increase' | 'decrease',
+              },
+            },
+            {
+              title: 'Flagged Accounts',
+              value: response.data.stats.flagged_accounts,
+              change: {
+                value: '15.3%', // TODO: Calculate from API if available
+                type: 'increase' as 'increase' | 'decrease',
+              },
+            },
+          ]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      // Keep empty array on error
+      setUsersTableData([]);
+      setPagination(undefined);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Table columns configuration
-  const usersTableColumns = [
+  const usersTableColumns: TableColumn<User>[] = [
     {
       key: 'id',
       header: 'USER ID',
-      accessor: 'id' as const,
+      accessor: 'id',
+      width: "120px",
       render: (value: string) => (
         <span className="text-[#DEDEE3] font-mono text-sm">{value}</span>
       )
@@ -170,23 +351,45 @@ const Page = () => {
     {
       key: 'name',
       header: 'NAME',
-      accessor: 'name' as const,
+      accessor: 'first_name',
+      width: "150px",
       render: (value: string) => (
-        <span className="text-[#DEDEE3] text-sm">{value}</span>
+        <span className="text-[#DEDEE3] text-sm">{value ?? 'N/A'}</span>
       )
     },
     {
-      key: 'tier',
-      header: 'TIER',
-      accessor: 'tier' as const,
+      key: 'last_name',
+      header: 'LAST NAME',
+      accessor: 'last_name',
+      width: "150px",
+      render: (value: string) => (
+        <span className="text-[#DEDEE3] text-sm">{value ?? 'N/A'}</span>
+      )
+    },
+    {
+      key: 'verification_type',
+      header: 'VERIFICATION TYPE',
+      accessor: 'verification_type',
+      width: "180px",
+      render: (value: string) => (
+        <span className="text-[#8C8C93] text-sm">{value ?? 'N/A'}</span>
+      )
+    },
+    {
+      key: 'verification_number',
+      header: 'VERIFICATION NO.',
+      accessor: 'verification_number',
+      width: "160px",
       render: (value: string) => (
         <span className="text-[#8C8C93] text-sm">{value}</span>
       )
     },
+
     {
-      key: 'kycStatus',
+      key: 'verification_status',
       header: 'KYC STATUS',
-      accessor: 'kycStatus' as const,
+      accessor: 'verification_status',
+      width: "140px",
       render: (value: string) => {
         const statusColors = {
           'Completed': 'text-green-400',
@@ -208,30 +411,22 @@ const Page = () => {
         );
       }
     },
+    // {
+    //   key: 'totalBalance',
+    //   header: 'TOTAL BALANCE',
+    //   accessor: 'totalBalance',
+    //   render: (value: number) => (
+    //     <span className="text-[#8C8C93] text-sm">₦{value.toLocaleString()}.00</span>
+    //   )
+    // },
     {
-      key: 'totalBalance',
-      header: 'TOTAL BALANCE',
-      accessor: 'totalBalance' as const,
-      render: (value: number) => (
-        <span className="text-[#8C8C93] text-sm">₦{value.toLocaleString()}.00</span>
-      )
-    },
-    {
-      key: 'date',
+      key: 'created_at',
       header: 'DATE',
-      accessor: 'date' as const,
-      render: (value: string) => (
-        <span className="text-[#8C8C93] text-sm">{value}</span>
-      )
+      accessor: 'created_at',
+      type: 'datetime',
+      width: "180px",
     }
   ];
-
-  const [dateRange, setDateRange] = useState<DateRange | RelativeRange>({
-    label: 'Last 7 Days',
-    value: 'last-7-days'
-  });
-
-  const [searchQuery, setSearchQuery] = useState('');
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
       <div className="px-4 sm:px-6 animate-in slide-in-from-top duration-600">
@@ -287,45 +482,53 @@ const Page = () => {
                     : `${dateRange.from?.toLocaleDateString()} - ${dateRange.to?.toLocaleDateString()}`
                 })
               </p>
-              <p className="text-base sm:text-2xl font-semibold text-[#DEDEE3] transition-all duration-300 break-all">2,563,975,897</p>
+              <p className="text-base sm:text-2xl font-semibold text-[#DEDEE3] transition-all duration-300 break-all">
+                {chartLoading ? 'Loading...' : totalUsers}
+              </p>
             </div>
 
             {/* Chart Container */}
             <div className="overflow-hidden rounded-lg">
-              <Chart
-                className='border-none p-0'
-                type="area"
-                data={userGrowthData}
-                fields={{
-                  label: 'month',
-                  values: ['users']
-                }}
-                height={280}
-                colors={{
-                  series: ['#3AF4BD'],
-                  grid: '#374151',
-                  text: {
-                    primary: '#DEDEE3',
-                    secondary: '#8C8C93',
-                    muted: '#7A7A83'
-                  }
-                }}
-                layout={{
-                  gridLines: 'none',
-                  legend: {
-                    position: 'none',
-                    style: 'lines',
-                  }
-                }}
-                showDataPoints={false} // Disable the dots/nodes on the line
-                formatters={userChartFormatters}
-                animation={{
-                  enabled: true,
-                  duration: 1000,
-                  delay: 400,
-                  stagger: true
-                }}
-              />
+              {chartLoading ? (
+                <div className="flex items-center justify-center h-[280px]">
+                  <div className="text-[#8C8C93]">Loading chart data...</div>
+                </div>
+              ) : (
+                <Chart
+                  className='border-none p-0'
+                  type="area"
+                  data={userGrowthData}
+                  fields={{
+                    label: 'month',
+                    values: ['users']
+                  }}
+                  height={280}
+                  colors={{
+                    series: ['#3AF4BD'],
+                    grid: '#374151',
+                    text: {
+                      primary: '#DEDEE3',
+                      secondary: '#8C8C93',
+                      muted: '#7A7A83'
+                    }
+                  }}
+                  layout={{
+                    gridLines: 'none',
+                    legend: {
+                      position: 'none',
+                      style: 'lines',
+                    }
+                  }}
+                  showDataPoints={false} // Disable the dots/nodes on the line
+                  formatters={userChartFormatters}
+                  animation={{
+                    enabled: true,
+                    duration: 1000,
+                    delay: 400,
+                    stagger: true
+                  }}
+                />
+              )}
             </div>
           </div>
 
@@ -382,7 +585,9 @@ const Page = () => {
                 <UsersIcon width={18} height={18} />
               </div>
               <div>
-                <h2 className="text-lg font-medium text-[#DEDEE3]">Users (15,000)</h2>
+                <h2 className="text-lg font-medium text-[#DEDEE3]">
+                  Users ({pagination?.total_items?.toLocaleString() || '0'})
+                </h2>
               </div>
             </div>
 
@@ -451,8 +656,18 @@ const Page = () => {
             columns={usersTableColumns}
             variant="dark"
             bordered={false}
+            loading={isLoading}
             className="animate-in fade-in duration-700 delay-700"
-            onRowClick={(row) => router.push(`/dashboard/users/${row.id}`)}
+            onRowClick={(row) => {
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('selectedUserData', JSON.stringify(row));
+              }
+              router.push(`/dashboard/users/${row.id}`);
+            }}
+            pagination={pagination}
+            onPageChange={(page: number) => fetchUsers(page, pagination?.per_page || 10)}
+            onPageSizeChange={(pageSize: number) => fetchUsers(1, pageSize)}
+            showPagination={true}
           />
         </div>
       </div>

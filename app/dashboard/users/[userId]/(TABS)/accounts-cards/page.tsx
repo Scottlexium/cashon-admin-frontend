@@ -1,226 +1,232 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { DataTable, TableColumn } from '@/components/ui/table';
 import { Button } from '@/components/ui/button/button';
 import { Input } from '@/components/ui/input';
 import { ReceiptIcon } from '@/components/icons';
+import api from '@/lib/api';
+
+// TypeScript interfaces for accounts data
+interface BankAccount {
+    id: number;
+    user_id: number;
+    bank_name: string;
+    bank_code: string;
+    account_name: string;
+    account_number: string;
+    account_type: string;
+    is_default: number;
+    created_at: string;
+    updated_at: string;
+}
+
+interface DebitCard {
+    id: number;
+    user_id: number;
+    card_number: string;
+    card_holder: string;
+    expiry_month: string;
+    expiry_year: string;
+    provider: string;
+    is_linked: number;
+    created_at: string;
+    updated_at: string;
+}
+
+interface UserAccountsResponse {
+    bank_account: BankAccount[];
+    debit_card: DebitCard[];
+}
 
 const AccountsAndCards = () => {
+    const params = useParams();
+    const userId = params?.userId as string;
     const [searchQuery, setSearchQuery] = useState('');
+    const [accountsData, setAccountsData] = useState<UserAccountsResponse | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Bank Accounts Data
-    const bankAccountsData = [
-        {
-            id: '1',
-            bankName: 'Access Bank',
-            accountNumber: '2093748268',
-            bankCode: '464738',
-            accountName: 'James Stephen Adeleke',
-            dateLinked: 'Nov 15, 2025',
-            lastUsed: 'Nov 15, 2025'
-        },
-        {
-            id: '2',
-            bankName: 'Zenith Bank',
-            accountNumber: '0193748268',
-            bankCode: '737489',
-            accountName: 'Uche Richards Ezechukwu',
-            dateLinked: 'Oct 30, 2025',
-            lastUsed: 'Oct 30, 2025'
-        },
-        {
-            id: '3',
-            bankName: 'Guaranty Trust Bank',
-            accountNumber: '0193748268',
-            bankCode: '0193748268',
-            accountName: 'Maya Lin Wong',
-            dateLinked: 'Feb 30, 2025',
-            lastUsed: 'Feb 30, 2025'
-        },
-        {
-            id: '4',
-            bankName: 'Access Bank',
-            accountNumber: '0193748268',
-            bankCode: '0193748268',
-            accountName: 'Samuel Jason Park',
-            dateLinked: 'Jan 25, 2026',
-            lastUsed: 'Jan 25, 2026'
-        },
-        {
-            id: '5',
-            bankName: 'First Bank of Nigeria',
-            accountNumber: '0193748268',
-            bankCode: '0193748268',
-            accountName: 'Nina Claire Rodrigues',
-            dateLinked: 'Mar 15, 2025',
-            lastUsed: 'Mar 15, 2025'
+
+    useEffect(() => {
+        const fetchAccountsData = async () => {
+            if (!userId) return;
+
+            try {
+                setLoading(true);
+                setError(null);
+
+
+                const response = await api.get(`/user-account/${userId}`);
+                setAccountsData(response.data);
+            } catch (err) {
+                console.error('Error fetching accounts data:', err);
+                setError('Failed to load accounts data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAccountsData();
+    }, [userId]);
+
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch {
+            return dateString;
         }
-    ];
+    };
+    const bankAccountsData = accountsData ? accountsData.bank_account : [];
 
-    // Cards Data
-    const cardsData = [
-        {
-            id: '1',
-            cardType: 'Access Bank',
-            cardName: 'Access Bank',
-            last4Digits: '2093748268',
-            expiry: '10/22',
-            dateLinked: 'Nov 15, 2025',
-            lastUsed: 'Nov 15, 2025'
-        },
-        {
-            id: '2',
-            cardType: 'Zenith Bank',
-            cardName: 'Zenith Bank',
-            last4Digits: '0193748268',
-            expiry: '12/28',
-            dateLinked: 'Oct 30, 2025',
-            lastUsed: 'Oct 30, 2025'
-        },
-        {
-            id: '3',
-            cardType: 'Guaranty Trust Bank',
-            cardName: 'Guaranty Trust Bank',
-            last4Digits: '0193748268',
-            expiry: '10/28',
-            dateLinked: 'Feb 30, 2025',
-            lastUsed: 'Feb 30, 2025'
-        },
-        {
-            id: '4',
-            cardType: 'Access Bank',
-            cardName: 'Access Bank',
-            last4Digits: '0193748268',
-            expiry: '11/15',
-            dateLinked: 'Jan 25, 2026',
-            lastUsed: 'Jan 25, 2026'
-        },
-        {
-            id: '5',
-            cardType: 'First Bank of Nigeria',
-            cardName: 'First Bank of Nigeria',
-            last4Digits: '0193748268',
-            expiry: '09/30',
-            dateLinked: 'Mar 15, 2025',
-            lastUsed: 'Mar 15, 2025'
-        }
-    ];
+    const cardsData = accountsData ? accountsData.debit_card : [];
 
-    // Bank Accounts Table Columns
-    const bankAccountsColumns: TableColumn<any>[] = [
+
+    const bankAccountsColumns: TableColumn<BankAccount>[] = [
         {
-            key: 'bankName',
+            key: 'bank_name',
             header: 'BANK NAME',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#DEDEE3] font-medium">{row.bankName}</span>
+            render: (value: any, row: BankAccount) => (
+                <div className="flex items-center gap-2">
+                    <span className="text-[#DEDEE3] font-medium">{row.bank_name}</span>
+                    {row.is_default === 1 && (
+                        <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">Default</span>
+                    )}
+                </div>
             )
         },
         {
-            key: 'accountNumber',
+            key: 'account_number',
             header: 'ACCOUNT NUMBER',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.accountNumber}</span>
+            render: (value: any, row: BankAccount) => (
+                <span className="text-[#8C8C93] font-mono">{row.account_number}</span>
             )
         },
         {
-            key: 'bankCode',
+            key: 'bank_code',
             header: 'BANK CODE',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.bankCode}</span>
+            render: (value: any, row: BankAccount) => (
+                <span className="text-[#8C8C93] font-mono">{row.bank_code}</span>
             )
         },
         {
-            key: 'accountName',
+            key: 'account_name',
             header: 'ACCOUNT NAME',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#DEDEE3]">{row.accountName}</span>
+            render: (value: any, row: BankAccount) => (
+                <span className="text-[#DEDEE3]">{row.account_name}</span>
             )
         },
         {
-            key: 'dateLinked',
+            key: 'account_type',
+            header: 'ACCOUNT TYPE',
+            sortable: true,
+            render: (value: any, row: BankAccount) => (
+                <span className="text-[#8C8C93] capitalize">{row.account_type}</span>
+            )
+        },
+        {
+            key: 'created_at',
             header: 'DATE LINKED',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.dateLinked}</span>
-            )
-        },
-        {
-            key: 'lastUsed',
-            header: 'LAST USED',
-            sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.lastUsed}</span>
+            render: (value: any, row: BankAccount) => (
+                <span className="text-[#8C8C93]">{formatDate(row.created_at)}</span>
             )
         }
     ];
 
-    // Cards Table Columns
-    const cardsColumns: TableColumn<any>[] = [
+
+    const cardsColumns: TableColumn<DebitCard>[] = [
         {
-            key: 'cardType',
-            header: 'CARD TYPE',
+            key: 'provider',
+            header: 'PROVIDER',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#DEDEE3] font-medium">{row.cardType}</span>
+            render: (value: any, row: DebitCard) => (
+                <div className="flex items-center gap-2">
+                    <span className="text-[#DEDEE3] font-medium">{row.provider}</span>
+                    {row.is_linked === 1 && (
+                        <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">Linked</span>
+                    )}
+                </div>
             )
         },
         {
-            key: 'cardName',
-            header: 'CARD NAME',
+            key: 'card_holder',
+            header: 'CARD HOLDER',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.cardName}</span>
+            render: (value: any, row: DebitCard) => (
+                <span className="text-[#8C8C93]">{row.card_holder}</span>
             )
         },
         {
-            key: 'last4Digits',
-            header: 'LAST 4 DIGITS',
+            key: 'card_number',
+            header: 'CARD NUMBER',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.last4Digits}</span>
+            render: (value: any, row: DebitCard) => (
+                <span className="text-[#8C8C93] font-mono">{row.card_number}</span>
             )
         },
         {
-            key: 'expiry',
+            key: 'expiry_month',
             header: 'EXPIRY',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.expiry}</span>
+            render: (value: any, row: DebitCard) => (
+                <span className="text-[#8C8C93] font-mono">{row.expiry_month}/{row.expiry_year}</span>
             )
         },
         {
-            key: 'dateLinked',
+            key: 'created_at',
             header: 'DATE LINKED',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.dateLinked}</span>
-            )
-        },
-        {
-            key: 'lastUsed',
-            header: 'LAST USED',
-            sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.lastUsed}</span>
+            render: (value: any, row: DebitCard) => (
+                <span className="text-[#8C8C93]">{formatDate(row.created_at)}</span>
             )
         }
     ];
 
-    // Filter data based on search query
+
     const filteredBankAccounts = bankAccountsData.filter(account =>
-        account.bankName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        account.accountNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        account.accountName.toLowerCase().includes(searchQuery.toLowerCase())
+        account.bank_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        account.account_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        account.account_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const filteredCards = cardsData.filter(card =>
-        card.cardType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        card.cardName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        card.last4Digits.toLowerCase().includes(searchQuery.toLowerCase())
+        card.card_holder.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        card.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        card.card_number.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    if (loading) {
+        return (
+            <div className="px-3 md:px-6 py-12 text-center text-[#8C8C93]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#DEDEE3] mx-auto mb-4"></div>
+                Loading accounts data...
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="px-3 md:px-6 py-12 text-center text-[#FF6B6B]">
+                <div className="mb-4">
+                    <svg className="w-12 h-12 mx-auto mb-4 text-[#FF6B6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <p className="text-lg font-medium">{error}</p>
+                    <p className="text-sm text-[#8C8C93] mt-2">Please try refreshing the page</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">

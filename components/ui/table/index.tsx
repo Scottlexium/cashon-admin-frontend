@@ -3,15 +3,19 @@
 import React, { useState } from 'react';
 import { formatDateTime, formatDate, formatCurrency } from '@/lib/utils';
 import { ApiPaginationInfo } from '@/lib/types';
+import { Button } from '../button/button';
+import { Select } from '@/components/ui/select/select';
+import { Input } from '@/components/ui/input';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export type ColumnType = 
-  | 'text' 
-  | 'datetime' 
-  | 'date' 
-  | 'currency' 
-  | 'status' 
-  | 'email' 
-  | 'phone' 
+export type ColumnType =
+  | 'text'
+  | 'datetime'
+  | 'date'
+  | 'currency'
+  | 'status'
+  | 'email'
+  | 'phone'
   | 'number'
   | 'custom';
 
@@ -48,6 +52,7 @@ export interface TableProps<T = any> {
   // Pagination props
   pagination?: ApiPaginationInfo;
   onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
   showPagination?: boolean;
 }
 
@@ -67,10 +72,13 @@ export function DataTable<T = any>({
   compact = false,
   pagination,
   onPageChange,
+  onPageSizeChange,
   showPagination = true
 }: TableProps<T>) {
   const [copiedCell, setCopiedCell] = useState<string | null>(null);
-
+  console.log(
+    'DataTable Render:', { dataLength: data.length, loading, pagination }
+  )
   const copyToClipboard = async (text: string, cellId: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -83,7 +91,7 @@ export function DataTable<T = any>({
 
   const getRawCellValue = (row: T, column: TableColumn<T>) => {
     if (column.accessor) {
-      return typeof column.accessor === 'function' 
+      return typeof column.accessor === 'function'
         ? column.accessor(row)
         : row[column.accessor];
     }
@@ -96,43 +104,43 @@ export function DataTable<T = any>({
     switch (column.type) {
       case 'datetime':
         return formatDateTime(value);
-      
+
       case 'date':
         return formatDate(value);
-      
+
       case 'currency':
         const numValue = typeof value === 'string' ? parseFloat(value) : value;
         return formatCurrency(numValue, column.currency || 'NGN', column.locale || 'en-US');
-      
+
       case 'status':
         return <StatusBadge status={value} variant="dot" />;
-      
+
       case 'email':
         return (
-          <a 
-            href={`mailto:${value}`} 
+          <a
+            href={`mailto:${value}`}
             className="text-blue-400 hover:text-blue-300 underline"
             onClick={(e) => e.stopPropagation()}
           >
             {column.truncate ? truncateText(value, column.truncate) : value}
           </a>
         );
-      
+
       case 'phone':
         return (
-          <a 
-            href={`tel:${value}`} 
+          <a
+            href={`tel:${value}`}
             className="text-blue-400 hover:text-blue-300 underline"
             onClick={(e) => e.stopPropagation()}
           >
             {value}
           </a>
         );
-      
+
       case 'number':
         const numVal = typeof value === 'string' ? parseFloat(value) : value;
         return numVal.toLocaleString(column.locale || 'en-US');
-      
+
       case 'text':
       default:
         return column.truncate ? truncateText(String(value), column.truncate) : String(value);
@@ -149,7 +157,7 @@ export function DataTable<T = any>({
       const value = getRawCellValue(row, column);
       return column.render(value, row, data.indexOf(row));
     }
-    
+
     const rawValue = getRawCellValue(row, column);
     return formatCellValue(rawValue, column, row);
   };
@@ -170,7 +178,7 @@ export function DataTable<T = any>({
     }
   };
 
-  const baseClasses = variant === 'dark' 
+  const baseClasses = variant === 'dark'
     ? 'bg-[#1C1C1E] border-[#313135BA] text-[#DEDEE3]'
     : 'bg-white border-gray-200 text-gray-900';
 
@@ -198,7 +206,7 @@ export function DataTable<T = any>({
           </div>
         )}
         <div className="p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#01AB79] mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#65A3FF] mx-auto"></div>
           <p className="mt-4 text-[#8C8C93]">Loading...</p>
         </div>
       </div>
@@ -222,8 +230,8 @@ export function DataTable<T = any>({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        <table className="w-full min-w-max">
           {/* Table Header */}
           {showHeader && (
             <thead className={headerClasses}>
@@ -235,8 +243,12 @@ export function DataTable<T = any>({
                       px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium uppercase tracking-wider
                       ${getAlignmentClass(column.align)}
                       ${column.className || ''}
+                      whitespace-nowrap
                     `}
-                    style={{ width: column.width }}
+                    style={{
+                      width: column.width,
+                      minWidth: column.width || '120px'
+                    }}
                   >
                     {column.header}
                   </th>
@@ -249,8 +261,8 @@ export function DataTable<T = any>({
           <tbody className="divide-y divide-[#313135BA]">
             {data.length === 0 ? (
               <tr>
-                <td 
-                  colSpan={columns.length} 
+                <td
+                  colSpan={columns.length}
                   className="px-6 py-8 text-center text-[#8C8C93]"
                 >
                   {emptyMessage}
@@ -278,7 +290,7 @@ export function DataTable<T = any>({
                   {columns.map((column, colIndex) => {
                     const cellId = `cell-${rowIndex}-${colIndex}`;
                     const isCopied = copiedCell === cellId;
-                    
+
                     return (
                       <td
                         key={`cell-${rowIndex}-${column.key}-${colIndex}`}
@@ -288,16 +300,24 @@ export function DataTable<T = any>({
                           ${column.className || ''}
                           ${compact ? 'py-2' : ''}
                           ${column.copyable ? 'cursor-copy hover:bg-opacity-50 hover:bg-gray-500 transition-colors' : ''}
-                          ${isCopied ? 'bg-[#01AB79]/50 bg-opacity-20' : ''}
+                          ${isCopied ? 'bg-green-500 bg-opacity-20' : ''}
+                          whitespace-nowrap
                         `}
-                        style={{ width: column.width }}
+                        style={{
+                          width: column.width,
+                          minWidth: column.width || '120px'
+                        }}
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleCellClick(row, column, rowIndex, colIndex);
+                          // Only stop propagation for copyable cells
+                          if (column.copyable) {
+                            e.stopPropagation();
+                            handleCellClick(row, column, rowIndex, colIndex);
+                          }
+                          // For non-copyable cells, let the event bubble up to trigger row click
                         }}
                         title={
-                          column.copyable 
-                            ? 'Click to copy' 
+                          column.copyable
+                            ? 'Click to copy'
                             : (column.truncate && String(getRawCellValue(row, column)).length > column.truncate)
                               ? String(getRawCellValue(row, column))
                               : undefined
@@ -330,11 +350,12 @@ export function DataTable<T = any>({
       </div>
 
       {/* Built-in Pagination */}
-      {showPagination && pagination && pagination.totalPages > 1 && (
+      {showPagination && pagination && pagination.total_pages > 1 && (
         <div className="border-t border-[#313135BA]">
           <TablePagination
             pagination={pagination}
             onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
             loading={loading}
             variant={variant}
           />
@@ -348,147 +369,235 @@ export function DataTable<T = any>({
 interface TablePaginationProps {
   pagination: ApiPaginationInfo;
   onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
   loading?: boolean;
   variant?: 'default' | 'dark';
+  showPageSizeSelect?: boolean;
+  pageSizeOptions?: number[];
 }
 
-function TablePagination({ 
-  pagination, 
-  onPageChange, 
-  loading = false, 
-  variant = 'dark' 
+function TablePagination({
+  pagination,
+  onPageChange,
+  onPageSizeChange,
+  loading = false,
+  variant = 'dark',
+  showPageSizeSelect = true,
+  pageSizeOptions = [10, 20, 50, 100]
 }: TablePaginationProps) {
-  const { currentPage, totalPages, totalItems, limit } = pagination;
-
-  // Calculate page range to show with improved logic
-  const getPageRange = () => {
-    const delta = 1; // Show fewer pages for cleaner look
-    const range = [];
-    const rangeWithDots = [];
-
-    // Always show first page
-    if (totalPages > 0) {
-      rangeWithDots.push(1);
-    }
-
-    // Add ellipsis and middle pages
-    if (currentPage > delta + 2) {
-      rangeWithDots.push('...');
-    }
-
-    // Add pages around current page
-    for (let i = Math.max(2, currentPage - delta); 
-         i <= Math.min(totalPages - 1, currentPage + delta); 
-         i++) {
-      if (i !== 1 && i !== totalPages) {
-        range.push(i);
-      }
-    }
-
-    rangeWithDots.push(...range);
-
-    // Add ellipsis and last page
-    if (currentPage < totalPages - delta - 1) {
-      rangeWithDots.push('...');
-    }
-
-    if (totalPages > 1) {
-      rangeWithDots.push(totalPages);
-    }
-
-    // Remove duplicates
-    return rangeWithDots.filter((item, index, arr) => 
-      index === 0 || item !== arr[index - 1]
-    );
-  };
+  const { current_page, total_pages, total_items, per_page } = pagination;
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages && !loading && onPageChange) {
+    if (page >= 1 && page <= total_pages && !loading && onPageChange) {
       onPageChange(page);
     }
   };
 
-  const startItem = (currentPage - 1) * limit + 1;
-  const endItem = Math.min(currentPage * limit, totalItems);
+  const handlePageSizeChange = (newPageSize: string | string[] | null) => {
+    if (typeof newPageSize === 'string' && onPageSizeChange && !loading) {
+      onPageSizeChange(parseInt(newPageSize));
+    }
+  };
 
-  const textColor = variant === 'dark' ? 'text-[#8C8C93]' : 'text-gray-600';
-  const highlightColor = variant === 'dark' ? 'text-[#DEDEE3]' : 'text-gray-900';
-  const buttonBg = variant === 'dark' ? 'bg-[#303033] hover:bg-[#404043]' : 'bg-gray-100 hover:bg-gray-200';
-  const activeBg = variant === 'dark' ? 'bg-[#01AB79] hover:bg-[#5C96E8]' : 'bg-blue-600 hover:bg-blue-700';
+  // Generate smart page numbers (show first few, last few, and current vicinity)
+  const generatePageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 5; // Maximum page buttons to show (excluding ellipsis)
+    
+    if (total_pages <= maxVisible + 2) {
+      // Show all pages if total is small (7 or fewer)
+      return Array.from({ length: total_pages }, (_, i) => i + 1);
+    }
+
+    // Always show first page
+    pages.push(1);
+
+    // If current page is close to start (pages 1-4)
+    if (current_page <= 3) {
+      // Show: 1, 2, 3, 4, ..., last
+      for (let i = 2; i <= Math.min(4, total_pages - 1); i++) {
+        pages.push(i);
+      }
+      if (total_pages > 4) {
+        pages.push('...');
+        pages.push(total_pages);
+      }
+    }
+    // If current page is close to end
+    else if (current_page >= total_pages - 2) {
+      // Show: 1, ..., last-3, last-2, last-1, last
+      pages.push('...');
+      for (let i = Math.max(2, total_pages - 3); i <= total_pages; i++) {
+        if (i !== 1) pages.push(i);
+      }
+    }
+    // Current page is in the middle
+    else {
+      // Show: 1, ..., current-1, current, current+1, ..., last
+      pages.push('...');
+      pages.push(current_page - 1);
+      pages.push(current_page);
+      pages.push(current_page + 1);
+      pages.push('...');
+      pages.push(total_pages);
+    }
+
+    return pages;
+  };
+
+  const pageNumbers = generatePageNumbers();
+  const startItem = (current_page - 1) * per_page + 1;
+  const endItem = Math.min(current_page * per_page, total_items);
+
+  const pageSizeSelectOptions = pageSizeOptions.map(size => ({
+    value: size.toString(),
+    label: size.toString()
+  }));
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-[#1C1C1E] border-t border-[#313135BA]">
-      {/* Results info */}
-      <div className="flex items-center gap-4">
-        <div className="text-sm text-[#8C8C93]">
-          Showing <span className="font-semibold text-[#DEDEE3]">{startItem}</span>-<span className="font-semibold text-[#DEDEE3]">{endItem}</span> of{' '}
-          <span className="font-semibold text-[#DEDEE3]">{totalItems.toLocaleString()}</span> results
+    <div className="flex flex-col gap-4 px-4 sm:px-6 py-4 bg-[#1C1C1E] border-t border-[#313135BA]">
+      {/* Mobile layout */}
+      <div className="flex sm:hidden flex-col gap-3">
+        {/* Results info */}
+        <div className="text-center text-sm text-[#8C8C93]">
+          <span className="font-semibold text-[#DEDEE3]">{startItem}-{endItem}</span> of{' '}
+          <span className="font-semibold text-[#DEDEE3]">{total_items}</span>
+        </div>
+        
+        {/* Page size selector */}
+        {showPageSizeSelect && (
+          <div className="flex items-center justify-center gap-2 text-sm text-[#8C8C93]">
+            <span>Show</span>
+            <div className="w-16">
+              <Select
+                options={pageSizeSelectOptions}
+                value={per_page.toString()}
+                onChange={handlePageSizeChange}
+                placeholder="10"
+                className="text-sm bg-[#303033] border-[#363639] text-[#DEDEE3]"
+                disabled={loading}
+              />
+            </div>
+            <span>per page</span>
+          </div>
+        )}
+
+        {/* Mobile pagination controls */}
+        <div className="flex items-center justify-between">
+          {/* Previous button */}
+          <button
+            onClick={() => handlePageChange(current_page - 1)}
+            disabled={current_page <= 1 || loading}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#303033] hover:bg-[#404043] disabled:opacity-50 disabled:cursor-not-allowed text-[#DEDEE3] border border-[#363639] transition-all duration-200"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="text-sm">Previous</span>
+          </button>
+
+          {/* Page info */}
+          <div className="text-sm text-[#DEDEE3] font-medium">
+            {current_page} of {total_pages}
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={() => handlePageChange(current_page + 1)}
+            disabled={current_page >= total_pages || loading}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#303033] hover:bg-[#404043] disabled:opacity-50 disabled:cursor-not-allowed text-[#DEDEE3] border border-[#363639] transition-all duration-200"
+          >
+            <span className="text-sm">Next</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       </div>
 
-      {/* Pagination controls */}
-      <div className="flex items-center gap-2">
-        {/* Previous button */}
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage <= 1 || loading}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#DEDEE3] bg-[#2C2C2E] hover:bg-[#36363A] border border-[#404043] rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2C2C2E]"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span className="hidden sm:inline">Previous</span>
-        </button>
-
-        {/* Page numbers */}
-        <div className="flex items-center gap-1">
-          {getPageRange().map((page, index) => (
-            <React.Fragment key={index}>
-              {page === '...' ? (
-                <span className="flex items-center justify-center w-10 h-10 text-[#8C8C93] text-sm">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <circle cx="5" cy="12" r="2"/>
-                    <circle cx="12" cy="12" r="2"/>
-                    <circle cx="19" cy="12" r="2"/>
-                  </svg>
-                </span>
-              ) : (
-                <button
-                  onClick={() => handlePageChange(page as number)}
+      {/* Desktop layout */}
+      <div className="hidden sm:flex items-center justify-between">
+        {/* Left side - Results info and page size */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 text-sm text-[#8C8C93]">
+          <span>
+            Showing <span className="font-semibold text-[#DEDEE3]">{startItem}</span> to{' '}
+            <span className="font-semibold text-[#DEDEE3]">{endItem}</span> of{' '}
+            <span className="font-semibold text-[#DEDEE3]">{total_items}</span> results
+          </span>
+          
+          {showPageSizeSelect && (
+            <div className="flex items-center gap-2">
+              <span>Show</span>
+              <div className="w-20">
+                <Select
+                  options={pageSizeSelectOptions}
+                  value={per_page.toString()}
+                  onChange={handlePageSizeChange}
+                  placeholder="10"
+                  className="text-sm bg-[#303033] border-[#363639] text-[#DEDEE3]"
                   disabled={loading}
-                  className={`
-                    flex items-center justify-center w-10 h-10 text-sm font-semibold rounded-lg transition-all duration-200
-                    ${currentPage === page
-                      ? 'bg-[#01AB79] text-white shadow-lg shadow-[#01AB79]/25 transform scale-105'
-                      : 'bg-[#2C2C2E] text-[#DEDEE3] hover:bg-[#36363A] border border-[#404043] hover:border-[#01AB79]/50'
-                    }
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                  `}
-                >
-                  {page}
-                </button>
-              )}
-            </React.Fragment>
-          ))}
+                />
+              </div>
+              <span>per page</span>
+            </div>
+          )}
         </div>
 
-        {/* Next button */}
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage >= totalPages || loading}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#DEDEE3] bg-[#2C2C2E] hover:bg-[#36363A] border border-[#404043] rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2C2C2E]"
-        >
-          <span className="hidden sm:inline">Next</span>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+        {/* Right side - Desktop pagination controls */}
+        <div className="flex items-center gap-2">
+          {/* Previous button */}
+          <button
+            onClick={() => handlePageChange(current_page - 1)}
+            disabled={current_page <= 1 || loading}
+            className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#303033] hover:bg-[#404043] disabled:opacity-50 disabled:cursor-not-allowed text-[#DEDEE3] border border-[#363639] transition-all duration-200"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
 
-      {/* Mobile-only page info */}
-      <div className="sm:hidden text-xs text-[#8C8C93] text-center">
-        Page <span className="font-semibold text-[#DEDEE3]">{currentPage}</span> of{' '}
-        <span className="font-semibold text-[#DEDEE3]">{totalPages}</span>
+          {/* Smart page buttons */}
+          <div className="flex items-center gap-1">
+            {pageNumbers.map((page, index) => (
+              <div key={index}>
+                {page === '...' ? (
+                  <span className="flex items-center justify-center min-w-10 h-10 px-2 text-[#8C8C93]">
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => handlePageChange(page as number)}
+                    disabled={loading}
+                    className={`flex items-center justify-center min-w-10 h-10 px-3 rounded-lg text-sm font-medium border transition-all duration-200 ${
+                      page === current_page
+                        ? loading
+                          ? 'bg-[#00FFB3] text-black border-[#00FFB3]'
+                          : 'bg-[#00FFB3] text-black border-[#00FFB3] shadow-lg transform scale-105'
+                        : 'bg-[#303033] text-[#DEDEE3] border-[#363639] hover:bg-[#404043] hover:text-white hover:border-[#404043]'
+                    } disabled:cursor-not-allowed`}
+                  >
+                    {loading && page === current_page ? (
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      page
+                    )}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={() => handlePageChange(current_page + 1)}
+            disabled={current_page >= total_pages || loading}
+            className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#303033] hover:bg-[#404043] disabled:opacity-50 disabled:cursor-not-allowed text-[#DEDEE3] border border-[#363639] transition-all duration-200"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );

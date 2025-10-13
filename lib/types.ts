@@ -6,12 +6,11 @@ export interface Department {
 }
 
 export interface ApiPaginationInfo {
-  totalItems: number;
-  totalPages: number;
-  currentPage: number;
-  limit: number;
+  total_items: number;
+  total_pages: number;
+  current_page: number;
+  per_page: number;
 }
-
 export interface ApiPaginatedResponse<T> {
   data: T;
   pagination: ApiPaginationInfo;
@@ -79,4 +78,26 @@ export interface PaginatedResponse<T> {
     total: number;
     totalPages: number;
   };
+}
+
+export interface SavingsSummary {
+  vault_balance: string;
+  total_savings: string;
+  interest_earned: string;
+}
+
+export interface SavingsPlan {
+  plan_id: number;
+  savings_plan: string;
+  amount_saved: string;
+  status: string;
+  start_date: string | null;
+  end_date: string | null;
+  interest: number;
+}
+
+export interface UserSavingsResponse {
+  status: boolean;
+  summary: SavingsSummary;
+  savings_plans: SavingsPlan[];
 }

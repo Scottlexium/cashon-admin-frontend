@@ -1,18 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { DataTable, TableColumn } from '@/components/ui/table';
 import { Button } from '@/components/ui/button/button';
 import { Input } from '@/components/ui/input';
 import { MetricCard } from '@/components/ui/metric-card';
 import { WalletIcon, ReceiptIcon } from '@/components/icons';
+import api from '@/lib/api';
+
+// TypeScript interfaces for savings data
+interface SavingsSummary {
+  vault_balance: string;
+  total_savings: string;
+  interest_earned: string;
+}
+
+interface SavingsPlan {
+  plan_id: number;
+  savings_plan: string;
+  amount_saved: string;
+  status: string;
+  start_date: string | null;
+  end_date: string | null;
+  interest: number;
+}
+
+interface UserSavingsResponse {
+  status: boolean;
+  summary: SavingsSummary;
+  savings_plans: SavingsPlan[];
+}
 
 const SavingsPlanContent = () => {
+  const params = useParams();
+  const userId = params?.userId as string;
   const [searchQuery, setSearchQuery] = useState('');
+  const [savingsData, setSavingsData] = useState<UserSavingsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Cards data
-  const cardsData = [
+  // Fetch user savings data
+  useEffect(() => {
+    const fetchSavingsData = async () => {
+      if (!userId) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await api.get<UserSavingsResponse>(`/user-savings/${userId}`);
+        setSavingsData(response.data);
+      } catch (err) {
+        console.error('Error fetching savings data:', err);
+        setError('Failed to load savings data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSavingsData();
+  }, [userId]);
+
+  // Helper function to format currency
+  const formatCurrency = (amount: string | number) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return `₦${num.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+  };
+
+  // Helper function to format status
+  const formatStatus = (status: string) => {
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  };
+
+  // Cards data from API
+  const cardsData = savingsData ? [
     {
       title: 'Vault Balance',
-      amount: '₦32,450.00',
+      amount: formatCurrency(savingsData.summary.vault_balance),
       change: '15.3%',
       icon: <>
         <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -28,7 +91,7 @@ const SavingsPlanContent = () => {
     },
     {
       title: 'Total Savings',
-      amount: '₦32,450.00',
+      amount: formatCurrency(savingsData.summary.total_savings),
       change: '15.3%',
       icon: <>
         <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -44,7 +107,7 @@ const SavingsPlanContent = () => {
     },
     {
       title: 'Interest Earned',
-      amount: '₦32,450.00',
+      amount: formatCurrency(savingsData.summary.interest_earned),
       change: '15.3%',
       icon: <>
         <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -58,51 +121,30 @@ const SavingsPlanContent = () => {
 
       </>
     }
-  ];
+  ] : [];
 
-  // Savings plans data
-  const savingsPlansData = [
-    {
-      planId: 'SP1023',
-      savingsPlan: 'Education Funds',
-      amountSaved: '₦200,000.00',
-      status: 'Active',
-      startDate: 'Nov 15, 2025',
-      endDate: 'Nov 15, 2025'
-    },
-    {
-      planId: 'SP1024',
-      savingsPlan: 'Home Renovation',
-      amountSaved: '₦100,000.00',
-      status: 'Completed',
-      startDate: 'Oct 30, 2025',
-      endDate: 'Oct 30, 2025'
-    },
-    {
-      planId: 'SP1029',
-      savingsPlan: 'Stock Investment',
-      amountSaved: '₦50,000.00',
-      status: 'Completed',
-      startDate: 'Feb 30, 2025',
-      endDate: 'Feb 30, 2025'
-    },
-    {
-      planId: 'SP1039',
-      savingsPlan: 'Vacation',
-      amountSaved: '₦100,000.00',
-      status: 'On hold',
-      startDate: 'Jan 25, 2026',
-      endDate: 'Jan 25, 2026'
-    },
-    {
-      planId: 'SP1042',
-      savingsPlan: 'Emergency Funds',
-      amountSaved: '₦500,000.00',
-      status: 'Active',
-      startDate: 'Mar 15, 2025',
-      endDate: 'Mar 15, 2025'
-    }
-  ];
+  // Savings plans data from API with search filtering
+  const savingsPlansData = savingsData ? savingsData.savings_plans.filter(plan => 
+    plan.savings_plan.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    plan.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    plan.plan_id.toString().includes(searchQuery)
+  ).map(plan => ({
+    planId: `SP${plan.plan_id.toString().padStart(4, '0')}`,
+    savingsPlan: plan.savings_plan,
+    amountSaved: formatCurrency(plan.amount_saved),
+    status: formatStatus(plan.status),
+    startDate: plan.start_date ? new Date(plan.start_date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }) : 'N/A',
+    endDate: plan.end_date ? new Date(plan.end_date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }) : 'N/A',
+    interest: formatCurrency(plan.interest)
+  })) : [];
 
   // Table columns configuration
   const savingsPlansColumns: TableColumn<typeof savingsPlansData[0]>[] = [
@@ -143,11 +185,17 @@ const SavingsPlanContent = () => {
             statusClass = 'text-green-400';
             dotClass = 'bg-green-500';
             break;
+          case 'matured':
           case 'completed':
             statusClass = 'text-green-400';
             dotClass = 'bg-green-500';
             break;
           case 'on hold':
+          case 'paused':
+            statusClass = 'text-yellow-400';
+            dotClass = 'bg-yellow-500';
+            break;
+          case 'cancelled':
             statusClass = 'text-red-400';
             dotClass = 'bg-red-500';
             break;
@@ -179,8 +227,47 @@ const SavingsPlanContent = () => {
       render: (value: string) => (
         <span className="text-[#8C8C93] text-sm">{value}</span>
       )
+    },
+    {
+      key: 'interest',
+      header: 'INTEREST EARNED',
+      accessor: 'interest',
+      render: (value: string) => (
+        <span className="text-[#DEDEE3] text-sm font-semibold">{value}</span>
+      )
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="px-3 md:px-6 py-12 text-center text-[#8C8C93]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#DEDEE3] mx-auto mb-4"></div>
+        Loading savings data...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-3 md:px-6 py-12 text-center text-[#FF6B6B]">
+        <div className="mb-4">
+          <svg className="w-12 h-12 mx-auto mb-4 text-[#FF6B6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <p className="text-lg font-medium">{error}</p>
+          <p className="text-sm text-[#8C8C93] mt-2">Please try refreshing the page</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!savingsData) {
+    return (
+      <div className="px-3 md:px-6 py-12 text-center text-[#8C8C93]">
+        No savings data available
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">

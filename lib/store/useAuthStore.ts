@@ -34,6 +34,7 @@ export const useAuthStore = create<AuthStore>()(
         try {
           const response = await api.post<LoginResponse>('/login', credentials);
           const loginData = response.data;
+          console.log("login response", response.data)
           
           if (loginData?.token) {
             // Encrypt and store auth token in cookies
