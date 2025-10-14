@@ -165,10 +165,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   const isValid = touched && !error && internalValue;
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('space-y-4', className)}>
       {label && (
         <label className={cn(
-          "block font-medium text-text-primary mb-1",
+          "block font-medium text-[#A2A2A7] mb-4",
           size === 'sm' && 'text-sm',
           size === 'md' && 'text-sm',
           size === 'lg' && 'text-base'

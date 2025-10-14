@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from 'react';
 import { DataTable, TableColumn } from '@/components/ui/table';
 import { Button } from '@/components/ui/button/button';

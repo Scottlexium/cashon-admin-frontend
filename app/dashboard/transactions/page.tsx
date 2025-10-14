@@ -583,16 +583,16 @@ const Page = () => {
                                 <div className="flex items-center">
                                     <div className="flex items-center w-64">
                                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-3">
-                                            <path d="M6.00012 1.5V3.75" stroke="#8C8C93" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M11.9998 1.5V3.75" stroke="#8C8C93" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M2.62512 6.81738H15.3751" stroke="#8C8C93" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M15.75 6.375V12.75C15.75 15 14.625 16.5 12 16.5H6C3.375 16.5 2.25 15 2.25 12.75V6.375C2.25 4.125 3.375 2.625 6 2.625H12C14.625 2.625 15.75 4.125 15.75 6.375Z" stroke="#8C8C93" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M11.7708 10.2749H11.7776" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M11.7708 12.5249H11.7776" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M8.99686 10.2749H9.00359" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M8.99686 12.5249H9.00359" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M6.22067 10.2749H6.22741" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M6.22067 12.5249H6.22741" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M6.00012 1.5V3.75" stroke="#8C8C93" strokeWidth="1.5" stroke-miterlimit="10" strokeLinecap="round" stroke-linejoin="round" />
+                                            <path d="M11.9998 1.5V3.75" stroke="#8C8C93" strokeWidth="1.5" stroke-miterlimit="10" strokeLinecap="round" stroke-linejoin="round" />
+                                            <path d="M2.62512 6.81738H15.3751" stroke="#8C8C93" strokeWidth="1.5" stroke-miterlimit="10" strokeLinecap="round" stroke-linejoin="round" />
+                                            <path d="M15.75 6.375V12.75C15.75 15 14.625 16.5 12 16.5H6C3.375 16.5 2.25 15 2.25 12.75V6.375C2.25 4.125 3.375 2.625 6 2.625H12C14.625 2.625 15.75 4.125 15.75 6.375Z" stroke="#8C8C93" strokeWidth="1.5" stroke-miterlimit="10" strokeLinecap="round" stroke-linejoin="round" />
+                                            <path d="M11.7708 10.2749H11.7776" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                            <path d="M11.7708 12.5249H11.7776" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                            <path d="M8.99686 10.2749H9.00359" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                            <path d="M8.99686 12.5249H9.00359" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                            <path d="M6.22067 10.2749H6.22741" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                            <path d="M6.22067 12.5249H6.22741" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
                                         </svg>
                                         <span className="text-sm text-[#8C8C93]">Date</span>
                                     </div>
@@ -604,13 +604,13 @@ const Page = () => {
                                     <div className="flex items-center w-64">
                                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-3">
                                             <g clipPath="url(#clip0_2932_2865)">
-                                                <path d="M11.625 9.75C14.3174 9.75 16.5 9.07843 16.5 8.25C16.5 7.42157 14.3174 6.75 11.625 6.75C8.93261 6.75 6.75 7.42157 6.75 8.25C6.75 9.07843 8.93261 9.75 11.625 9.75Z" stroke="#8C8C93" stroke-width="1.5" />
-                                                <path d="M16.5 11.625C16.5 12.4534 14.3174 13.125 11.625 13.125C8.93257 13.125 6.75 12.4534 6.75 11.625" stroke="#8C8C93" stroke-width="1.5" />
-                                                <path d="M16.5 8.25V14.85C16.5 15.7613 14.3174 16.5 11.625 16.5C8.93257 16.5 6.75 15.7613 6.75 14.85V8.25" stroke="#8C8C93" stroke-width="1.5" />
-                                                <path d="M6.37488 4.5C9.06727 4.5 11.2499 3.82843 11.2499 3C11.2499 2.17157 9.06727 1.5 6.37488 1.5C3.68249 1.5 1.49988 2.17157 1.49988 3C1.49988 3.82843 3.68249 4.5 6.37488 4.5Z" stroke="#8C8C93" stroke-width="1.5" />
-                                                <path d="M4.49994 8.25C3.08108 8.07735 1.77737 7.63088 1.49994 6.75M4.49994 12C3.08108 11.8274 1.77737 11.3809 1.49994 10.5" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" />
-                                                <path d="M4.49988 15.751C3.08102 15.5783 1.77731 15.1319 1.49988 14.251V3.00098" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" />
-                                                <path d="M11.25 4.50098V3.00098" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" />
+                                                <path d="M11.625 9.75C14.3174 9.75 16.5 9.07843 16.5 8.25C16.5 7.42157 14.3174 6.75 11.625 6.75C8.93261 6.75 6.75 7.42157 6.75 8.25C6.75 9.07843 8.93261 9.75 11.625 9.75Z" stroke="#8C8C93" strokeWidth="1.5" />
+                                                <path d="M16.5 11.625C16.5 12.4534 14.3174 13.125 11.625 13.125C8.93257 13.125 6.75 12.4534 6.75 11.625" stroke="#8C8C93" strokeWidth="1.5" />
+                                                <path d="M16.5 8.25V14.85C16.5 15.7613 14.3174 16.5 11.625 16.5C8.93257 16.5 6.75 15.7613 6.75 14.85V8.25" stroke="#8C8C93" strokeWidth="1.5" />
+                                                <path d="M6.37488 4.5C9.06727 4.5 11.2499 3.82843 11.2499 3C11.2499 2.17157 9.06727 1.5 6.37488 1.5C3.68249 1.5 1.49988 2.17157 1.49988 3C1.49988 3.82843 3.68249 4.5 6.37488 4.5Z" stroke="#8C8C93" strokeWidth="1.5" />
+                                                <path d="M4.49994 8.25C3.08108 8.07735 1.77737 7.63088 1.49994 6.75M4.49994 12C3.08108 11.8274 1.77737 11.3809 1.49994 10.5" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" />
+                                                <path d="M4.49988 15.751C3.08102 15.5783 1.77731 15.1319 1.49988 14.251V3.00098" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" />
+                                                <path d="M11.25 4.50098V3.00098" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" />
                                             </g>
                                             <defs>
                                                 <clipPath id="clip0_2932_2865">
@@ -628,10 +628,10 @@ const Page = () => {
                                     <div className="flex items-center w-64">
                                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-3">
                                             <g clipPath="url(#clip0_2932_2877)">
-                                                <path d="M3.375 6.75H15.75" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                <path d="M12.375 2.8125L10.125 15.1875" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                <path d="M7.875 2.8125L5.625 15.1875" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                <path d="M2.25 11.25H14.625" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M3.375 6.75H15.75" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                                <path d="M12.375 2.8125L10.125 15.1875" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                                <path d="M7.875 2.8125L5.625 15.1875" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                                <path d="M2.25 11.25H14.625" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
                                             </g>
                                             <defs>
                                                 <clipPath id="clip0_2932_2877">
@@ -649,10 +649,10 @@ const Page = () => {
                                     <div className="flex items-center w-64">
                                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-3">
                                             <g clipPath="url(#clip0_2932_2887)">
-                                                <path d="M7.875 12.375L5.625 14.625L3.375 12.375" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                <path d="M5.625 3.375V14.625" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                <path d="M10.125 5.625L12.375 3.375L14.625 5.625" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                <path d="M12.375 14.625V3.375" stroke="#8C8C93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M7.875 12.375L5.625 14.625L3.375 12.375" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                                <path d="M5.625 3.375V14.625" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                                <path d="M10.125 5.625L12.375 3.375L14.625 5.625" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+                                                <path d="M12.375 14.625V3.375" stroke="#8C8C93" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
                                             </g>
                                             <defs>
                                                 <clipPath id="clip0_2932_2887">

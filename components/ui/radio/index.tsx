@@ -93,7 +93,7 @@ export const RadioOption: React.FC<RadioOptionProps> = ({
       className={cn(
         'flex items-center gap-3 cursor-pointer transition-all duration-200',
         disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-[#313135BA]/30',
-        'p-3 rounded-lg',
+        'mt-4 rounded-lg',
         className
       )}
       onClick={handleChange}
@@ -150,33 +150,48 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   value,
   onChange,
   options,
+  label,
   disabled = false,
   className,
   size = 'md',
   orientation = 'vertical',
 }) => {
   return (
-    <div
-      className={cn(
-        'space-y-1',
-        orientation === 'horizontal' && 'flex flex-wrap gap-2 space-y-0',
-        className
+    <div className={cn('space-y-3', className)}>
+      {/* Label */}
+      {label && (
+        <label className={cn(
+          'block font-medium text-[#8C8C93]',
+          size === 'sm' && 'text-sm',
+          size === 'md' && 'text-sm',
+          size === 'lg' && 'text-base'
+        )}>
+          {label}
+        </label>
       )}
-    >
-      {options.map((option) => (
-        <RadioOption
-          key={option.value}
-          name={name}
-          value={option.value}
-          checked={value === option.value}
-          onChange={onChange}
-          label={option.label}
-          description={option.description}
-          icon={option.icon}
-          disabled={disabled || option.disabled}
-          size={size}
-        />
-      ))}
+      
+      {/* Radio Options */}
+      <div
+        className={cn(
+          'space-y-1',
+          orientation === 'horizontal' && 'flex flex-wrap gap-2 space-y-0'
+        )}
+      >
+        {options.map((option) => (
+          <RadioOption
+            key={option.value}
+            name={name}
+            value={option.value}
+            checked={value === option.value}
+            onChange={onChange}
+            label={option.label}
+            description={option.description}
+            icon={option.icon}
+            disabled={disabled || option.disabled}
+            size={size}
+          />
+        ))}
+      </div>
     </div>
   );
 };

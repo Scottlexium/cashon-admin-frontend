@@ -48,6 +48,7 @@ export interface RadioGroupProps {
     icon?: React.ReactNode;
     disabled?: boolean;
   }>;
+  label?: string;
   disabled?: boolean;
   className?: string;
   size?: 'sm' | 'md' | 'lg';

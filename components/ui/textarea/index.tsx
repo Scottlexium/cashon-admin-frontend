@@ -137,7 +137,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-[#A2A2A7] mb-4">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
