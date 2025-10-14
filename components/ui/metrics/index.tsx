@@ -28,9 +28,9 @@ const getChangeIcon = (type: 'increase' | 'decrease' | 'neutral') => {
   
   return (
     <svg 
-      width="12" 
-      height="12" 
-      viewBox="0 0 12 12" 
+      width="14" 
+      height="14" 
+      viewBox="0 0 14 14" 
       fill="none"
       className={cn(
         'transition-colors',
@@ -38,13 +38,31 @@ const getChangeIcon = (type: 'increase' | 'decrease' | 'neutral') => {
       )}
     >
       {type === 'increase' ? (
-        <path 
-          d="M3 7.5L6 4.5L9 7.5" 
-          stroke="currentColor" 
-          strokeWidth="1.5" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        />
+        <g clipPath="url(#clip0_1500_5988)">
+          <path 
+            d="M7 12.2495C9.8995 12.2495 12.25 9.89901 12.25 6.99951C12.25 4.10002 9.8995 1.74951 7 1.74951C4.10051 1.74951 1.75 4.10002 1.75 6.99951C1.75 9.89901 4.10051 12.2495 7 12.2495Z" 
+            stroke="currentColor" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          />
+          <path 
+            d="M8.75037 5.24951L5.25037 8.74951" 
+            stroke="currentColor" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          />
+          <path 
+            d="M6.12567 5.24951H8.75067V7.87451" 
+            stroke="currentColor" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          />
+          <defs>
+            <clipPath id="clip0_1500_5988">
+              <rect width="14" height="14" fill="white"/>
+            </clipPath>
+          </defs>
+        </g>
       ) : (
         <path 
           d="M3 4.5L6 7.5L9 4.5" 
