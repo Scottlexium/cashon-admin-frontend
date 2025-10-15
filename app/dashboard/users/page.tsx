@@ -540,7 +540,7 @@ const Page = () => {
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-[#303033] border-[0.78px] border-[#363639] flex items-center justify-center">
                   <ReceiptIcon />
                 </div>
-                <h2 className="text-lg font-medium text-[#DEDEE3]">Revenue</h2>
+                <h2 className="text-lg font-medium text-[#DEDEE3]">Tiers</h2>
               </div>
 
               {/* Date Filter Dropdown */}

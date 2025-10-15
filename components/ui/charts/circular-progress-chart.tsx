@@ -7,6 +7,10 @@ export interface CircularProgressChartProps {
     totalValue: number;
     currency?: string;
     locale?: string;
+    // Center content customization
+    centerTitle?: string;
+    formatAsCurrency?: boolean;
+    customFormatter?: (value: number) => string;
     segments: Array<{
         label: string;
         value: number;
@@ -33,6 +37,10 @@ export function CircularProgressChart({
     totalValue,
     currency = 'NGN',
     locale = 'en-NG',
+    // Center content props with defaults
+    centerTitle = 'Total',
+    formatAsCurrency = false,
+    customFormatter,
     segments,
     className = '',
     // Size props with defaults
@@ -60,6 +68,23 @@ export function CircularProgressChart({
         }).format(value);
     };
 
+    const formatNumber = (value: number) => {
+        return new Intl.NumberFormat(locale, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(value);
+    };
+
+    const formatDisplayValue = (value: number) => {
+        if (customFormatter) {
+            return customFormatter(value);
+        }
+        if (formatAsCurrency) {
+            return formatCurrency(value);
+        }
+        return formatNumber(value);
+    };
+
     useEffect(() => {
         if (!svgRef.current) return;
 
@@ -67,7 +92,7 @@ export function CircularProgressChart({
         svg.selectAll("*").remove(); // Clear previous render
 
         const centerX = width / 2;
-        const centerY = height * 0.65; // Position arc higher up for race track look
+        const centerY = height * 0.65; // Position arc higher up for race track look : ALSO DO NOT TOUCH !!!
 
         const chartGroup = svg
             .attr('width', width)
@@ -126,7 +151,7 @@ export function CircularProgressChart({
             }
         });
 
-        // Add the race track background (270° arc)
+        // Adds the race track background (270° arc): DO NOT TOUCH , NO MATTER WHAT!!!
         const backgroundArc = d3.arc()
             .innerRadius(radius)
             .outerRadius(radius)
@@ -142,7 +167,7 @@ export function CircularProgressChart({
             .attr('strokeWidth', outerArcStrokeWidth)
             .attr('opacity', outerArcOpacity);
 
-        // Create pie generator for the data segments (270° arc)
+        // Creates pie generator for the data segments (270° arc)
         const pie = d3.pie<any>()
             .value(d => d.value)
             .startAngle(-Math.PI * 0.75)
@@ -150,7 +175,7 @@ export function CircularProgressChart({
             .padAngle(segmentSpacing) // Customizable gap between segments
             .sort(null);
 
-        // Create arc generator for strokes (not filled)
+        // Creates arc generator for strokes (not filled)
         const arc = d3.arc()
             .innerRadius(radius)
             .outerRadius(radius)
@@ -158,7 +183,7 @@ export function CircularProgressChart({
 
         const pieData = pie(segments);
 
-        // Create the colored segments as strokes
+        // Creates the colored segments as strokes
         chartGroup
             .selectAll('path.segment')
             .data(pieData)
@@ -208,7 +233,7 @@ export function CircularProgressChart({
                 .attr('opacity', innerArcOpacity);
         }
 
-    }, [segments, width, height, radius, strokeWidth, totalValue, currency, locale, segmentSpacing, showInnerArc, innerArcOffset, innerArcStrokeWidth, innerArcOpacity, outerArcStrokeWidth, outerArcOpacity]);
+    }, [segments, width, height, radius, strokeWidth, totalValue, currency, locale, centerTitle, formatAsCurrency, customFormatter, segmentSpacing, showInnerArc, innerArcOffset, innerArcStrokeWidth, innerArcOpacity, outerArcStrokeWidth, outerArcOpacity]);
 
     return (
         <div className={`flex flex-col items-center ${className}`}>
@@ -230,9 +255,9 @@ export function CircularProgressChart({
                         transform: 'translate(-50%, -50%)'
                     }}
                 >
-                    <p className="text-xs text-[#8C8C93] mb-1 tracking-wider uppercase">Total Revenue</p>
+                    <p className="text-xs text-[#8C8C93] mb-1 tracking-wider uppercase">{centerTitle}</p>
                     <p className="text-2xl sm:text-3xl font-bold text-[#DEDEE3]">
-                        {formatCurrency(totalValue)}
+                        {formatDisplayValue(totalValue)}
                     </p>
                 </div>
             </div>

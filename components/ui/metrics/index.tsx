@@ -87,8 +87,8 @@ export function Metrics({
         'relative overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-lg group',
         'transform-gpu will-change-transform',
         variant === 'dark' 
-          ? 'bg-[#1C1C1E] border-[#313135BA] border-2 hover:border-[#00FFB3]/30 hover:shadow-[#00FFB3]/10' 
-          : 'bg-white border-gray-200 hover:border-[#00FFB3]/30',
+          ? 'bg-[#1C1C1E] border-[#313135BA] border-2 hover:border-[#2F2F32] hover:shadow-[#2F2F32]/10' 
+          : 'bg-white border-gray-200 hover:border-[#2F2F32]/30',
         className
       )}
       style={{ boxShadow: '0px 1px 2px 0px #1018280D' }}
@@ -102,7 +102,7 @@ export function Metrics({
             <div 
               key={index} 
               className={cn(
-                'relative flex-1 p-4 sm:p-6 transition-all duration-300 hover:bg-[#00FFB3]/5 animate-in fade-in',
+                'relative flex-1 p-4 sm:p-6 transition-all duration-300 hover:bg-[#2F2F32]/20 animate-in fade-in',
                 'transform-gpu will-change-transform'
               )}
               style={{ 
@@ -114,9 +114,9 @@ export function Metrics({
               {index < items.length - 1 && (
                 <>
                   {/* Vertical divider for desktop */}
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[60%] w-px bg-gray-800 hidden sm:block transition-colors duration-300 group-hover:bg-[#00FFB3]/30"></div>
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-[60%] w-px bg-gray-800 hidden sm:block transition-colors duration-300 group-hover:bg-[#2F2F32]"></div>
                   {/* Horizontal divider for mobile */}
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60%] h-px bg-gray-800 block sm:hidden transition-colors duration-300 group-hover:bg-[#00FFB3]/30"></div>
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60%] h-px bg-gray-800 block sm:hidden transition-colors duration-300 group-hover:bg-[#2F2F32]"></div>
                 </>
               )}
               
@@ -124,7 +124,7 @@ export function Metrics({
               <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8">
                 {item.icon && (
                   <div className={cn(
-                    'flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 group-hover:scale-110 group-hover:text-[#00FFB3]',
+                    'flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300 group-hover:scale-110 group-hover:text-[#2F2F32]',
                     variant === 'dark' ? 'text-[#8C8C93]' : 'text-gray-600'
                   )}>
                     {item.icon}
@@ -142,7 +142,7 @@ export function Metrics({
               <div className="mb-3 sm:mb-4">
                 <span className={cn(
                   'text-lg sm:text-xl lg:text-2xl font-semibold tracking-tight transition-all duration-300 break-all',
-                  'group-hover:text-[#00FFB3] group-hover:scale-105 transform-gpu',
+                  'group-hover:text-[#2F2F32] group-hover:scale-105 transform-gpu',
                   variant === 'dark' ? 'text-[#DEDEE3]' : 'text-black'
                 )}>
                   {formattedValue}
@@ -177,7 +177,7 @@ export function Metrics({
       </div>
       
       {/* Subtle glow effect on hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#00FFB3]/0 via-[#00FFB3]/0 to-[#00FFB3]/0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#2F2F32]/0 via-[#2F2F32]/0 to-[#2F2F32]/0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 pointer-events-none" />
     </div>
   );
 }

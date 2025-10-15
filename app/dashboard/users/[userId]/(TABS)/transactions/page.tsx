@@ -203,19 +203,11 @@ const TransactionsContent = () => {
     // Transactions Table Columns
     const transactionsColumns: TableColumn<Transaction>[] = [
         {
-            key: 'reference',
-            header: 'REFERENCE',
+            key: 'id',
+            header: 'TRANSACTION ID',
             sortable: true,
             render: (value: any, row: Transaction) => (
                 <span className="text-[#DEDEE3] font-mono text-sm">{row.reference}</span>
-            )
-        },
-        {
-            key: 'type',
-            header: 'TYPE',
-            sortable: true,
-            render: (value: any, row: Transaction) => (
-                <span className="text-[#DEDEE3]">{getTransactionTypeDisplay(row)}</span>
             )
         },
         {
@@ -226,14 +218,6 @@ const TransactionsContent = () => {
                 <span className={`font-medium ${row.type === 'credit' ? 'text-[#00FFB3]' : 'text-[#FF453A]'}`}>
                     {row.type === 'credit' ? '+' : '-'}{formatCurrency(row.amount, row.currency)}
                 </span>
-            )
-        },
-        {
-            key: 'note',
-            header: 'DESCRIPTION',
-            sortable: false,
-            render: (value: any, row: Transaction) => (
-                <span className="text-[#8C8C93] text-sm">{row.note || 'N/A'}</span>
             )
         },
         {
@@ -263,8 +247,8 @@ const TransactionsContent = () => {
             transaction.amount.toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesFilter = activeFilter === 'All' || 
-            (activeFilter === 'Pay-Ins' && transaction.type === 'credit') ||
-            (activeFilter === 'Pay-Outs' && transaction.type === 'debit');
+            (activeFilter === 'Deposits' && transaction.type === 'credit') ||
+            (activeFilter === 'Withdrawals' && transaction.type === 'debit');
 
         return matchesSearch && matchesFilter;
     });
@@ -317,7 +301,7 @@ const TransactionsContent = () => {
 
                             {/* Filter Tabs */}
                             <div className="flex items-center bg-[#303033] rounded-lg p-1">
-                                {['All', 'Pay-Ins', 'Pay-Outs'].map((filter) => (
+                                {['All', 'Deposits', 'Withdrawals'].map((filter) => (
                                     <button
                                         key={filter}
                                         onClick={() => setActiveFilter(filter)}

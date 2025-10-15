@@ -11,6 +11,7 @@ export interface RangeSliderProps {
   maxValue: number;
   onChange: (min: number, max: number) => void;
   disabled?: boolean;
+  editable?: boolean;
   className?: string;
   trackClassName?: string;
   thumbClassName?: string;
@@ -27,6 +28,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
   maxValue,
   onChange,
   disabled = false,
+  editable = false,
   className,
   trackClassName,
   thumbClassName,
@@ -35,7 +37,18 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
   suffix = '',
 }) => {
   const [isDragging, setIsDragging] = useState<'min' | 'max' | null>(null);
+  const [localMinInput, setLocalMinInput] = useState<string>(minValue.toString());
+  const [localMaxInput, setLocalMaxInput] = useState<string>(maxValue.toString());
   const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Update local input values when props change
+  useEffect(() => {
+    setLocalMinInput(minValue.toString());
+  }, [minValue]);
+
+  useEffect(() => {
+    setLocalMaxInput(maxValue.toString());
+  }, [maxValue]);
 
   const formatDisplayValue = useCallback((value: number): string => {
     if (formatValue) {
@@ -144,15 +157,75 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
       <div className="flex justify-between">
         <div className="flex items-center">
           <span className="text-sm text-[#DEDEE3] mr-1">{prefix}</span>
-          <div className="px-2 py-1 bg-[#313135BA] rounded text-sm text-[#DEDEE3] font-medium">
-            {minValue.toLocaleString()}{suffix}
-          </div>
+          {editable ? (
+            <input
+              type="number"
+              value={localMinInput}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                setLocalMinInput(inputValue);
+                
+                // Allow empty input for better UX while typing
+                if (inputValue === '') {
+                  onChange(0, maxValue);
+                  return;
+                }
+                
+                // Remove leading zeros and parse
+                const cleanValue = parseInt(inputValue) || 0;
+                const clampedValue = Math.max(min, Math.min(cleanValue, maxValue));
+                onChange(clampedValue, maxValue);
+              }}
+              onBlur={() => {
+                // Clean up display on blur to ensure it matches the actual value
+                setLocalMinInput(minValue.toString());
+              }}
+              className="w-16 px-2 py-1 bg-[#313135BA] rounded text-sm text-[#DEDEE3] font-medium border-none outline-none focus:ring-1 focus:ring-[#00FFB3] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              min={min}
+              max={maxValue}
+              disabled={disabled}
+            />
+          ) : (
+            <div className="px-2 py-1 bg-[#313135BA] rounded text-sm text-[#DEDEE3] font-medium">
+              {minValue.toLocaleString()}{suffix}
+            </div>
+          )}
         </div>
         <div className="flex items-center">
           <span className="text-sm text-[#DEDEE3] mr-1">{prefix}</span>
-          <div className="px-2 py-1 bg-[#313135BA] rounded text-sm text-[#DEDEE3] font-medium">
-            {maxValue.toLocaleString()}{suffix}
-          </div>
+          {editable ? (
+            <input
+              type="number"
+              value={localMaxInput}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                setLocalMaxInput(inputValue);
+                
+                // Allow empty input for better UX while typing
+                if (inputValue === '') {
+                  onChange(minValue, 0);
+                  return;
+                }
+                
+                // Remove leading zeros and parse
+                const cleanValue = parseInt(inputValue) || 0;
+                const clampedValue = Math.min(max, Math.max(cleanValue, minValue));
+                onChange(minValue, clampedValue);
+              }}
+              onBlur={() => {
+                // Clean up display on blur to ensure it matches the actual value
+                setLocalMaxInput(maxValue.toString());
+              }}
+              className="w-16 px-2 py-1 bg-[#313135BA] rounded text-sm text-[#DEDEE3] font-medium border-none outline-none focus:ring-1 focus:ring-[#00FFB3] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              min={minValue}
+              max={max}
+              disabled={disabled}
+            />
+          ) : (
+            <div className="px-2 py-1 bg-[#313135BA] rounded text-sm text-[#DEDEE3] font-medium">
+              {maxValue.toLocaleString()}{suffix}
+            </div>
+          )}
         </div>
       </div>
     </div>

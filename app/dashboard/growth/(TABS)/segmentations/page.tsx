@@ -299,6 +299,7 @@ const SegmentationsPage = () => {
                                 minValue={formData.savingsWalletRange.min}
                                 maxValue={formData.savingsWalletRange.max}
                                 onChange={handleRangeChange('savingsWalletRange')}
+                                editable={true}
                                 prefix="₦ "
                             />
                         )}
@@ -322,6 +323,7 @@ const SegmentationsPage = () => {
                                 minValue={formData.vaultWalletRange.min}
                                 maxValue={formData.vaultWalletRange.max}
                                 onChange={handleRangeChange('vaultWalletRange')}
+                                editable={true}
                                 prefix="₦ "
                             />
                         )}

@@ -23,5 +23,5 @@ export const navigation: NavigationItem[] = [
   { name: 'Boost', href: '/dashboard/boost', icon: BoostIcon, permission: 'manage_payout' },
   { name: 'Compliance', href: '/dashboard/compliance', icon: ComplianceIcon, permission: 'view_kyc' },
   { name: 'Growth', href: '/dashboard/growth', icon: RevenueIcon },
-  { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, permission: 'system_config' },
+  { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
 ];

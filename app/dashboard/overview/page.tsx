@@ -399,6 +399,8 @@ export default function OverviewPage() {
               totalValue={14000}
               currency="NGN"
               locale="en-NG"
+              centerTitle="Total Revenue"
+              formatAsCurrency={true}
               segments={revenueData}
               className="animate-in fade-in duration-700 delay-600"
               width={350}
