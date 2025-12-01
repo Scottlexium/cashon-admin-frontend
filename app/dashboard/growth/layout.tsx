@@ -33,7 +33,7 @@ const GrowthLayout: React.FC<GrowthLayoutProps> = ({ children }) => {
             id: 'automations',
             label: 'Automations',
             href: '/dashboard/growth/automations'
-        }
+        },
     ];
 
     return (

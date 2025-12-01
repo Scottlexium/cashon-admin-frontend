@@ -51,10 +51,16 @@ const AutomationsPage = () => {
     const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [automations, setAutomations] = useState<Automation[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [togglingId, setTogglingId] = useState<number | null>(null);
+    const [creating, setCreating] = useState(false);
+    const [editing, setEditing] = useState(false);
+    const [createError, setCreateError] = useState<string | null>(null);
+    const [editError, setEditError] = useState<string | null>(null);
+    const [segments, setSegments] = useState<Segment[]>([]);
 
     // Form data for automation creation
     const [automationFormData, setAutomationFormData] = useState({
@@ -64,7 +70,18 @@ const AutomationsPage = () => {
         messageSubject: '',
         messageBody: '',
         segmentId: ''
-    })
+    });
+
+    // Form data for automation editing
+    const [editFormData, setEditFormData] = useState({
+        name: '',
+        triggerType: '',
+        channel: '',
+        messageSubject: '',
+        messageBody: '',
+        segmentId: '',
+        isActive: true
+    });
 
     // Fetch automations data
     const fetchAutomations = async () => {
@@ -81,8 +98,19 @@ const AutomationsPage = () => {
         }
     };
 
+    // Fetch segments for dropdown
+    const fetchSegments = async () => {
+        try {
+            const response = await api.get<Segment[]>('/segments');
+            setSegments(response.data);
+        } catch (err: any) {
+            console.error('Error fetching segments:', err);
+        }
+    };
+
     useEffect(() => {
         fetchAutomations();
+        fetchSegments();
     }, []);
 
     // Toggle automation active state
@@ -240,25 +268,111 @@ const AutomationsPage = () => {
         setIsCreateModalOpen(true);
     };
 
+    const handleEditAutomation = (automation: Automation) => {
+        setEditFormData({
+            name: automation.name,
+            triggerType: automation.trigger_event,
+            channel: automation.channel,
+            messageSubject: automation.subject || '',
+            messageBody: automation.message,
+            segmentId: String(automation.segment_id),
+            isActive: automation.is_active
+        });
+        setSelectedAutomation(automation);
+        setIsEditModalOpen(true);
+        setIsDetailsModalOpen(false);
+    };
+
     const handleFormInputChange = (key: string, value: any) => {
         setAutomationFormData(prev => ({
             ...prev,
             [key]: value
         }));
+        setCreateError(null);
     };
 
-    const handleCreateSubmit = () => {
-        console.log('Creating automation:', automationFormData);
-        setIsCreateModalOpen(false);
-        // Reset form
-        setAutomationFormData({
-            name: '',
-            triggerType: '',
-            channel: '',
-            messageSubject: '',
-            messageBody: '',
-            segmentId: ''
-        });
+    const handleEditFormInputChange = (key: string, value: any) => {
+        setEditFormData(prev => ({
+            ...prev,
+            [key]: value
+        }));
+        setEditError(null);
+    };
+
+    const handleCreateSubmit = async () => {
+        try {
+            setCreating(true);
+            setCreateError(null);
+
+            await api.post('/automations', {
+                name: automationFormData.name,
+                trigger_event: automationFormData.triggerType,
+                segment_id: Number(automationFormData.segmentId),
+                channel: automationFormData.channel,
+                subject: automationFormData.messageSubject,
+                message: automationFormData.messageBody,
+                is_active: true
+            });
+
+            // Refresh automations list
+            await fetchAutomations();
+            
+            // Close modal and reset form
+            setIsCreateModalOpen(false);
+            setAutomationFormData({
+                name: '',
+                triggerType: '',
+                channel: '',
+                messageSubject: '',
+                messageBody: '',
+                segmentId: ''
+            });
+        } catch (err: any) {
+            console.error('Error creating automation:', err);
+            setCreateError(err.response?.data?.message || err.message || 'Failed to create automation');
+        } finally {
+            setCreating(false);
+        }
+    };
+
+    const handleEditSubmit = async () => {
+        if (!selectedAutomation) return;
+
+        try {
+            setEditing(true);
+            setEditError(null);
+
+            await api.put(`/automations/${selectedAutomation.id}`, {
+                name: editFormData.name,
+                trigger_event: editFormData.triggerType,
+                segment_id: Number(editFormData.segmentId),
+                channel: editFormData.channel,
+                subject: editFormData.messageSubject,
+                message: editFormData.messageBody,
+                is_active: editFormData.isActive
+            });
+
+            // Refresh automations list
+            await fetchAutomations();
+            
+            // Close modal and reset
+            setIsEditModalOpen(false);
+            setSelectedAutomation(null);
+            setEditFormData({
+                name: '',
+                triggerType: '',
+                channel: '',
+                messageSubject: '',
+                messageBody: '',
+                segmentId: '',
+                isActive: true
+            });
+        } catch (err: any) {
+            console.error('Error updating automation:', err);
+            setEditError(err.response?.data?.message || err.message || 'Failed to update automation');
+        } finally {
+            setEditing(false);
+        }
     };
 
     // Filter automations based on search query
@@ -412,6 +526,7 @@ const AutomationsPage = () => {
                             <Button
                                 variant="ghost"
                                 size="sm"
+                                onClick={() => selectedAutomation && handleEditAutomation(selectedAutomation)}
                                 className="h-8 px-3 text-[#8C8CA1] hover:text-[#DEDEE3] bg-[#303033] hover:bg-[#313135BA] cursor-pointer"
                             >
                                 Edit
@@ -510,12 +625,22 @@ const AutomationsPage = () => {
             {/* Create Automation Modal */}
             <Modal
                 isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
+                onClose={() => {
+                    setIsCreateModalOpen(false);
+                    setCreateError(null);
+                }}
                 title="Create new automation"
                 size="lg"
                 className="w-full"
             >
                 <div className="p-6 space-y-6">
+                    {/* Error Message */}
+                    {createError && (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                            <p className="text-red-400">{createError}</p>
+                        </div>
+                    )}
+
                     <div>
                         <Input
                             label="Automation Name"
@@ -528,7 +653,6 @@ const AutomationsPage = () => {
                     </div>
 
                     <div>
-
                         <Select
                             label="Trigger Event"
                             placeholder="Select trigger event"
@@ -541,6 +665,20 @@ const AutomationsPage = () => {
                                 { value: 'kyc_approved', label: 'KYC Approved' },
                                 { value: 'boost_allocation', label: 'Boost Allocation' }
                             ]}
+                            className="w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <Select
+                            label="Target Segment"
+                            placeholder="Select segment"
+                            value={automationFormData.segmentId}
+                            onChange={(value) => handleFormInputChange('segmentId', value)}
+                            options={segments.map(segment => ({
+                                value: String(segment.id),
+                                label: `${segment.name} (${segment.members_count} users)`
+                            }))}
                             className="w-full"
                         />
                     </div>
@@ -636,15 +774,199 @@ const AutomationsPage = () => {
                     <div className="grid gap-3 pt-4 w-3/4 grid-cols-2 justify-self-end">
                         <Button
                             variant="filled"
-                            onClick={() => setIsCreateModalOpen(false)}
+                            onClick={() => {
+                                setIsCreateModalOpen(false);
+                                setCreateError(null);
+                            }}
+                            disabled={creating}
                         >
                             Cancel
                         </Button>
                         <Button
                             onClick={handleCreateSubmit}
-                            className="bg-[#00FFB3] text-black hover:bg-[#00FFB3]/90"
+                            disabled={creating || !automationFormData.name || !automationFormData.triggerType || !automationFormData.channel || !automationFormData.segmentId || !automationFormData.messageBody}
+                            className="bg-[#00FFB3] text-black hover:bg-[#00FFB3]/90 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Create Automation
+                            {creating ? 'Creating...' : 'Create Automation'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Edit Automation Modal */}
+            <Modal
+                isOpen={isEditModalOpen}
+                onClose={() => {
+                    setIsEditModalOpen(false);
+                    setEditError(null);
+                }}
+                title="Edit automation"
+                size="lg"
+                className="w-full"
+            >
+                <div className="p-6 space-y-6">
+                    {/* Error Message */}
+                    {editError && (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                            <p className="text-red-400">{editError}</p>
+                        </div>
+                    )}
+
+                    <div>
+                        <Input
+                            label="Automation Name"
+                            placeholder="Enter automation name"
+                            value={editFormData.name}
+                            onChange={(e) => handleEditFormInputChange('name', e.target.value)}
+                            className="text-[#DEDEE3] placeholder-[#8C8C93] w-full"
+                            variant='filled'
+                        />
+                    </div>
+
+                    <div>
+                        <Select
+                            label="Trigger Event"
+                            placeholder="Select trigger event"
+                            value={editFormData.triggerType}
+                            onChange={(value) => handleEditFormInputChange('triggerType', value)}
+                            options={[
+                                { value: 'inactivity', label: 'User Inactivity' },
+                                { value: 'plan_maturity', label: 'Plan Maturity' },
+                                { value: 'deposit', label: 'Deposit Made' },
+                                { value: 'kyc_approved', label: 'KYC Approved' },
+                                { value: 'boost_allocation', label: 'Boost Allocation' }
+                            ]}
+                            className="w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <Select
+                            label="Target Segment"
+                            placeholder="Select segment"
+                            value={editFormData.segmentId}
+                            onChange={(value) => handleEditFormInputChange('segmentId', value)}
+                            options={segments.map(segment => ({
+                                value: String(segment.id),
+                                label: `${segment.name} (${segment.members_count} users)`
+                            }))}
+                            className="w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <RadioGroup
+                            name="edit-channel"
+                            label="Channel"
+                            value={editFormData.channel}
+                            onChange={(value) => handleEditFormInputChange('channel', value)}
+                            options={[
+                                {
+                                    value: 'email',
+                                    label: 'Email',
+                                    icon: (
+                                        <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <g clipPath="url(#clip0_2340_3226)">
+                                                <path d="M2.5 6.33366C2.5 5.89163 2.67559 5.46771 2.98816 5.15515C3.30072 4.84259 3.72464 4.66699 4.16667 4.66699H15.8333C16.2754 4.66699 16.6993 4.84259 17.0118 5.15515C17.3244 5.46771 17.5 5.89163 17.5 6.33366V14.667C17.5 15.109 17.3244 15.5329 17.0118 15.8455C16.6993 16.1581 16.2754 16.3337 15.8333 16.3337H4.16667C3.72464 16.3337 3.30072 16.1581 2.98816 15.8455C2.67559 15.5329 2.5 15.109 2.5 14.667V6.33366Z" stroke="#6C6C72" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M2.5 6.33301L10 11.333L17.5 6.33301" stroke="#6C6C72" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                                            </g>
+                                            <defs>
+                                                <clipPath id="clip0_2340_3226">
+                                                    <rect width="20" height="20" fill="white" transform="translate(0 0.5)" />
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                    )
+                                },
+                                {
+                                    value: 'push_notification',
+                                    label: 'Push Notification',
+                                    icon: (
+                                        <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <g clipPath="url(#clip0_2340_3236)">
+                                                <path d="M5 4.66667C5 4.22464 5.17559 3.80072 5.48816 3.48816C5.80072 3.17559 6.22464 3 6.66667 3H13.3333C13.7754 3 14.1993 3.17559 14.5118 3.48816C14.8244 3.80072 15 4.22464 15 4.66667V16.3333C15 16.7754 14.8244 17.1993 14.5118 17.5118C14.1993 17.8244 13.7754 18 13.3333 18H6.66667C6.22464 18 5.80072 17.8244 5.48816 17.5118C5.17559 17.1993 5 16.7754 5 16.3333V4.66667Z" stroke="#6C6C72" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M9.16602 3.83301H10.8327" stroke="#6C6C72" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M10 14.667V14.6757" stroke="#6C6C72" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                                            </g>
+                                            <defs>
+                                                <clipPath id="clip0_2340_3236">
+                                                    <rect width="20" height="20" fill="white" transform="translate(0 0.5)" />
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                    )
+                                },
+                                {
+                                    value: 'sms',
+                                    label: 'SMS',
+                                    icon: (
+                                        <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <g clipPath="url(#clip0_2340_3245)">
+                                                <path d="M6.66699 8H13.3337" stroke="#6C6C72" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M6.66602 11.333H11.666" stroke="#6C6C72" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M15 3.83301C15.663 3.83301 16.2989 4.0964 16.7678 4.56524C17.2366 5.03408 17.5 5.66997 17.5 6.33301V12.9997C17.5 13.6627 17.2366 14.2986 16.7678 14.7674C16.2989 15.2363 15.663 15.4997 15 15.4997H10.8333L6.66667 17.9997V15.4997H5C4.33696 15.4997 3.70107 15.2363 3.23223 14.7674C2.76339 14.2986 2.5 13.6627 2.5 12.9997V6.33301C2.5 5.66997 2.76339 5.03408 3.23223 4.56524C3.70107 4.0964 4.33696 3.83301 5 3.83301H15Z" stroke="#6C6C72" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
+                                            </g>
+                                            <defs>
+                                                <clipPath id="clip0_2340_3245">
+                                                    <rect width="20" height="20" fill="white" transform="translate(0 0.5)" />
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                    )
+                                }
+                            ]}
+                        />
+                    </div>
+                    <div className='bg-[#3030336E] w-full py-3 px-2 border-[#303033] border rounded-md text-[#DEDEE3CC] mt-2'>Message</div>
+
+                    <div>
+                        <Input
+                            label="Message Subject"
+                            placeholder="Enter message subject"
+                            value={editFormData.messageSubject}
+                            onChange={(e) => handleEditFormInputChange('messageSubject', e.target.value)}
+                            className="w-full"
+                            variant='filled'
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-[#8C8C93] mb-2">Message Body</label>
+                        <Textarea
+                            placeholder="Enter message body"
+                            value={editFormData.messageBody}
+                            onChange={(e) => handleEditFormInputChange('messageBody', e.target.value)}
+                            rows={4}
+                            variant="filled"
+                            className="w-full"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <label className="text-sm font-medium text-[#8C8C93]">Active Status</label>
+                        <Toggle
+                            checked={editFormData.isActive}
+                            onChange={(checked) => handleEditFormInputChange('isActive', checked)}
+                        />
+                    </div>
+
+                    <div className="grid gap-3 pt-4 w-3/4 grid-cols-2 justify-self-end">
+                        <Button
+                            variant="filled"
+                            onClick={() => {
+                                setIsEditModalOpen(false);
+                                setEditError(null);
+                            }}
+                            disabled={editing}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleEditSubmit}
+                            disabled={editing || !editFormData.name || !editFormData.triggerType || !editFormData.channel || !editFormData.segmentId || !editFormData.messageBody}
+                            className="bg-[#00FFB3] text-black hover:bg-[#00FFB3]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {editing ? 'Updating...' : 'Update Automation'}
                         </Button>
                     </div>
                 </div>

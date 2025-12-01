@@ -1,11 +1,26 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
+import api from '@/lib/api';
+
+interface SystemSettings {
+    early_withdrawal_fee_enabled: boolean;
+    early_withdrawal_fee_rate: string;
+    auto_pause_boost_threshold: string;
+    annual_boost_cap: string;
+    max_boost_per_user: string;
+    global_auto_reinvestment: boolean;
+}
 
 const SystemConfigurationsPage = () => {
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
     const [settings, setSettings] = useState({
         earlyWithdrawalFee: {
             enabled: true,
@@ -24,29 +39,108 @@ const SystemConfigurationsPage = () => {
         globalAutoReinvestment: true
     });
 
+    // Fetch settings from API
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get<SystemSettings[]>('/settings');
+                const data = response.data[0]; // Get first object from array
+                
+                setSettings({
+                    earlyWithdrawalFee: {
+                        enabled: data.early_withdrawal_fee_enabled,
+                        value: String(data.early_withdrawal_fee_rate),
+                        unit: 'percentage'
+                    },
+                    autoPauseBoostThreshold: {
+                        value: String(data.auto_pause_boost_threshold)
+                    },
+                    annualBoostCap: {
+                        value: String(data.annual_boost_cap)
+                    },
+                    maxBoostPerUser: {
+                        value: String(data.max_boost_per_user)
+                    },
+                    globalAutoReinvestment: data.global_auto_reinvestment
+                });
+                
+                setError(null);
+            } catch (err: any) {
+                setError(err.response?.data?.message || err.message || 'Failed to fetch settings');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSettings();
+    }, []);
+
     const handleToggleChange = (key: string, value: boolean | string) => {
         setSettings(prev => {
-            const newSettings = { ...prev };
             if (key.includes('.')) {
-                const [parentKey, childKey] = key.split('.');
-                (newSettings as any)[parentKey] = {
-                    ...(newSettings as any)[parentKey],
-                    [childKey]: value
+                const [parent, child] = key.split('.');
+                return {
+                    ...prev,
+                    [parent]: { ...(prev as any)[parent], [child]: value }
                 };
-            } else {
-                (newSettings as any)[key] = value;
             }
-            return newSettings;
+            return { ...prev, [key]: value };
         });
+        
+        setSuccessMessage(null);
+        setError(null);
     };
 
-    const handleSaveSettings = () => {
-        console.log('Saving settings:', settings);
+    const handleSaveSettings = async () => {
+        try {
+            setSaving(true);
+            
+            await api.put('/settings', {
+                early_withdrawal_fee_enabled: settings.earlyWithdrawalFee.enabled,
+                early_withdrawal_fee_rate: settings.earlyWithdrawalFee.value,
+                auto_pause_boost_threshold: settings.autoPauseBoostThreshold.value,
+                annual_boost_cap: settings.annualBoostCap.value,
+                max_boost_per_user: settings.maxBoostPerUser.value,
+                global_auto_reinvestment: settings.globalAutoReinvestment
+            });
+            
+            setSuccessMessage('Settings updated successfully');
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Failed to save settings');
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
         <div className="space-y-8 max-w-4xl pb-10">
-            {/* Early Withdrawal Fee */}
+            {/* Loading State */}
+            {loading && (
+                <div className="flex items-center justify-center p-8">
+                    <div className="text-[#8C8C93]">Loading settings...</div>
+                </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                    <p className="text-red-400">{error}</p>
+                </div>
+            )}
+
+            {/* Success Message */}
+            {successMessage && (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                    <p className="text-green-400">{successMessage}</p>
+                </div>
+            )}
+
+            {/* Content - Only show when not loading */}
+            {!loading && (
+                <>
+                    {/* Early Withdrawal Fee */}
             <div className="space-y-4">
                 <div className="flex items-start justify-between">
                     <div className="space-y-1">
@@ -159,6 +253,19 @@ const SystemConfigurationsPage = () => {
                     />
                 </div>
             </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end pt-4">
+                <Button
+                    onClick={handleSaveSettings}
+                    disabled={saving}
+                    className="px-6 py-2 bg-[#00FFB3] text-black hover:bg-[#00FFB3]/90 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                </Button>
+            </div>
+                </>
+            )}
         </div>
     );
 };

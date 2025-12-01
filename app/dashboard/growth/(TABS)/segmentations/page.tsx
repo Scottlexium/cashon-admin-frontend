@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataTable, TableColumn } from '@/components/ui/table';
 import { Button } from '@/components/ui/button/button';
 import { Input } from '@/components/ui/input';
@@ -7,10 +7,41 @@ import { Modal } from '@/components/ui/modal';
 import { Select } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { RangeSlider } from '@/components/ui/range-slider';
+import api from '@/lib/api';
+
+interface Segment {
+    id: number;
+    name: string;
+    criteria: {
+        kyc_tier?: string;
+        savings_wallet_balance?: {
+            min?: number;
+            max?: number;
+        };
+        vault_wallet_balance?: {
+            min?: number;
+            max?: number;
+        };
+        activity?: {
+            type?: string;
+            days?: number;
+        };
+    };
+    members_count: number;
+    criteria_summary: string;
+    created_at: string;
+    updated_at: string;
+}
 
 const SegmentationsPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [segments, setSegments] = useState<Segment[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
 
     // Form data for segment creation
     const [formData, setFormData] = useState({
@@ -41,6 +72,44 @@ const SegmentationsPage = () => {
         { value: 'Last login', label: 'Last login' },
     ];
 
+    // Fetch segments from API
+    useEffect(() => {
+        const fetchSegments = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get<Segment[]>(`/segments?page=${currentPage}`);
+                setSegments(response.data);
+                
+                if (response.pagination) {
+                    setTotalPages(response.pagination.total_pages);
+                    setTotalItems(response.pagination.total_items);
+                }
+                
+                setError(null);
+            } catch (err: any) {
+                console.error('Error fetching segments:', err);
+                setError(err.message || 'Failed to fetch segments');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSegments();
+    }, [currentPage]);
+
+    // Helper function to format date
+    const formatDate = (dateString: string): string => {
+        const date = new Date(dateString);
+        return date.toLocaleString('en-US', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    };
+
     // Form handling functions
     const handleInputChange = (field: string, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -53,13 +122,60 @@ const SegmentationsPage = () => {
         }));
     };
 
-    const handleCreateSegment = (segmentData: any) => {
-        console.log('Creating segment:', segmentData);
+    const handleCreateSegment = async (segmentData: any) => {
+        try {
+            // Transform form data to API format
+            const criteria: any = {};
+            
+            if (segmentData.savingPlanStatusEnabled && segmentData.savingPlanStatus) {
+                criteria.saving_plan_status = segmentData.savingPlanStatus;
+            }
+            
+            if (segmentData.savingsWalletBalanceEnabled) {
+                criteria.savings_wallet_balance = {
+                    min: segmentData.savingsWalletRange.min,
+                    max: segmentData.savingsWalletRange.max
+                };
+            }
+            
+            if (segmentData.vaultWalletBalanceEnabled) {
+                criteria.vault_wallet_balance = {
+                    min: segmentData.vaultWalletRange.min,
+                    max: segmentData.vaultWalletRange.max
+                };
+            }
+            
+            if (segmentData.userActivityEnabled) {
+                criteria.activity = {
+                    type: segmentData.activityType,
+                    days: segmentData.activityDays
+                };
+            }
+            
+            const payload = {
+                name: segmentData.segmentName,
+                criteria: criteria
+            };
+            
+            await api.post('/segments', payload);
+            
+            // Refresh segments list
+            const response = await api.get<Segment[]>(`/segments?page=${currentPage}`);
+            setSegments(response.data);
+            
+            if (response.pagination) {
+                setTotalPages(response.pagination.total_pages);
+                setTotalItems(response.pagination.total_items);
+            }
+        } catch (err: any) {
+            console.error('Error creating segment:', err);
+            setError(err.message || 'Failed to create segment');
+        }
     };
 
-    const handleSubmitSegment = () => {
+    const handleSubmitSegment = async () => {
         if (formData.segmentName.trim()) {
-            handleCreateSegment(formData);
+            await handleCreateSegment(formData);
             handleCloseModal();
         }
     };
@@ -80,90 +196,68 @@ const SegmentationsPage = () => {
         setIsCreateModalOpen(false);
     };
 
-    // Segment Library data
-    const segmentsData = [
-        {
-            id: '1',
-            segmentName: 'KYC Tier 1 only',
-            membersAssigned: '2,500',
-            criteriaSummary: 'Balance > ₦50k, Active plan',
-            dateCreated: '08 Aug 2025, 14:32'
-        },
-        {
-            id: '2',
-            segmentName: 'High Savers',
-            membersAssigned: '300',
-            criteriaSummary: 'Inactive > 30 days',
-            dateCreated: '09 Aug 2025, 09:15'
-        },
-        {
-            id: '3',
-            segmentName: 'Dormant Users 30d',
-            membersAssigned: '1,680',
-            criteriaSummary: 'Tier 1, Balance > ₦50k',
-            dateCreated: '10 Aug 2025, 11:47'
-        },
-        {
-            id: '4',
-            segmentName: 'Active Contributors',
-            membersAssigned: '5,000',
-            criteriaSummary: 'Tier 2, Balance ₦50k - ₦100k',
-            dateCreated: '11 Aug 2025, 16:22'
-        },
-        {
-            id: '5',
-            segmentName: 'New Sign-ups This Month',
-            membersAssigned: '8,000',
-            criteriaSummary: 'Active, Last login < 7 days',
-            dateCreated: '12 Aug 2025, 12:03'
-        }
-    ];
-
     // Table Columns
-    const segmentsColumns: TableColumn<any>[] = [
+    const segmentsColumns: TableColumn<Segment>[] = [
         {
-            key: 'segmentName',
+            key: 'name',
             header: 'SEGMENT NAME',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#DEDEE3] font-medium">{row.segmentName}</span>
+            render: (value: any, row: Segment) => (
+                <span className="text-[#DEDEE3] font-medium">{row.name}</span>
             )
         },
         {
-            key: 'membersAssigned',
+            key: 'members_count',
             header: 'MEMBERS ASSIGNED',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#DEDEE3] bg-[#303033] px-2.5 py-2 rounded-md font-medium">{row.membersAssigned}</span>
+            render: (value: any, row: Segment) => (
+                <span className="text-[#DEDEE3] bg-[#303033] px-2.5 py-2 rounded-md font-medium">
+                    {row.members_count.toLocaleString()}
+                </span>
             )
         },
         {
-            key: 'criteriaSummary',
+            key: 'criteria_summary',
             header: 'CRITERIA SUMMARY',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.criteriaSummary}</span>
+            render: (value: any, row: Segment) => (
+                <span className="text-[#8C8C93]">{row.criteria_summary}</span>
             )
         },
         {
-            key: 'dateCreated',
+            key: 'created_at',
             header: 'DATE CREATED',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.dateCreated}</span>
+            render: (value: any, row: Segment) => (
+                <span className="text-[#8C8C93]">{formatDate(row.created_at)}</span>
             )
         }
     ];
 
     // Filter data based on search query
-    const filteredSegments = segmentsData.filter(segment =>
-        segment.segmentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        segment.criteriaSummary.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredSegments = segments.filter(segment =>
+        segment.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        segment.criteria_summary.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
         <div className="space-y-6">
+            {/* Loading State */}
+            {loading && (
+                <div className="flex items-center justify-center p-8">
+                    <div className="text-[#8C8C93]">Loading segments...</div>
+                </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                    <p className="text-red-400">{error}</p>
+                </div>
+            )}
+
             {/* Segment Library Table */}
+            {!loading && (
             <div className="rounded-xl p-4 sm:p-6 bg-[#1C1C1E] border-[#313135BA] border-2">
                 {/* Table Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -235,8 +329,17 @@ const SegmentationsPage = () => {
                     columns={segmentsColumns}
                     variant="dark"
                     className="animate-in fade-in duration-700 delay-400 border-none"
+                    pagination={{
+                        total_items: totalItems,
+                        total_pages: totalPages,
+                        current_page: currentPage,
+                        per_page: 10
+                    }}
+                    onPageChange={setCurrentPage}
+                    showPagination={true}
                 />
             </div>
+            )}
 
             {/* Create Segment Modal */}
             <Modal

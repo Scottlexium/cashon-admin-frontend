@@ -54,6 +54,9 @@ const CampaignsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [creating, setCreating] = useState(false);
+    const [createError, setCreateError] = useState<string | null>(null);
+    const [segments, setSegments] = useState<Segment[]>([]);
     // Form data for campaign creation
     const [campaignFormData, setCampaignFormData] = useState({
         campaignName: '',
@@ -83,8 +86,18 @@ const CampaignsPage = () => {
         }
     };
 
+    const fetchSegments = async () => {
+        try {
+            const response = await api.get<Segment[]>('/segments');
+            setSegments(response.data);
+        } catch (err: any) {
+            console.error('Error fetching segments:', err);
+        }
+    };
+
     useEffect(() => {
         fetchCampaigns();
+        fetchSegments();
     }, []);
 
     // Get status badge color
@@ -179,13 +192,10 @@ const CampaignsPage = () => {
     );
 
     // Options for campaign creation
-    const targetSegmentOptions = [
-        { value: 'boost-participants', label: 'Boost Participants' },
-        { value: 'pending-kyc', label: 'Pending KYC' },
-        { value: 'active-savings', label: 'Users w/ Active Savings' },
-        { value: 'high-value-users', label: 'High Value Users' },
-        { value: 'dormant-users', label: 'Dormant Users' },
-    ];
+    const targetSegmentOptions = segments.map(segment => ({
+        value: String(segment.id),
+        label: `${segment.name} (${segment.members_count} users)`
+    }));
 
     const scheduleOptions = [
         { value: 'send-now', label: 'Send Now' },
@@ -195,12 +205,44 @@ const CampaignsPage = () => {
     // Form handlers
     const handleCampaignInputChange = (field: string, value: any) => {
         setCampaignFormData(prev => ({ ...prev, [field]: value }));
+        setCreateError(null);
     };
 
-    const handleCreateCampaign = () => {
-        // Handle campaign creation logic here
-        console.log('Creating campaign:', campaignFormData);
-        handleCloseCreateModal();
+    const handleCreateCampaign = async () => {
+        try {
+            setCreating(true);
+            setCreateError(null);
+
+            // Format scheduled_at if send-later is selected
+            let scheduledAt = null;
+            if (campaignFormData.scheduleType === 'send-later' && campaignFormData.scheduleDate) {
+                // Format as YYYY-MM-DD
+                const year = campaignFormData.scheduleDate.getFullYear();
+                const month = String(campaignFormData.scheduleDate.getMonth() + 1).padStart(2, '0');
+                const day = String(campaignFormData.scheduleDate.getDate()).padStart(2, '0');
+                scheduledAt = `${year}-${month}-${day}`;
+            }
+
+            await api.post('/campaigns', {
+                name: campaignFormData.campaignName,
+                segment_id: Number(campaignFormData.targetSegment),
+                channel: campaignFormData.channel,
+                subject: campaignFormData.messageSubject,
+                message: campaignFormData.messageBody,
+                ...(scheduledAt && { scheduled_at: scheduledAt })
+            });
+
+            // Refresh campaigns list
+            await fetchCampaigns();
+
+            // Close modal and reset form
+            handleCloseCreateModal();
+        } catch (err: any) {
+            console.error('Error creating campaign:', err);
+            setCreateError(err.response?.data?.message || err.message || 'Failed to create campaign');
+        } finally {
+            setCreating(false);
+        }
     };
 
     const handleCloseModal = () => {
@@ -220,6 +262,7 @@ const CampaignsPage = () => {
             scheduleDate: null,
             scheduleTime: ''
         });
+        setCreateError(null);
         setIsCreateModalOpen(false);
     };
 
@@ -399,6 +442,13 @@ const CampaignsPage = () => {
                 className="w-full mx-4 sm:mx-0 max-h-[95vh] sm:max-h-[90vh] overflow-hidden"
             >
                 <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-h-[calc(95vh-120px)] sm:max-h-[calc(90vh-120px)] overflow-y-auto">
+                    {/* Error Message */}
+                    {createError && (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                            <p className="text-red-400">{createError}</p>
+                        </div>
+                    )}
+
                     {/* Campaign Name */}
                     <div className="space-y-4">
                         <Input
@@ -542,6 +592,7 @@ const CampaignsPage = () => {
                         <Button
                             variant="secondary"
                             onClick={handleCloseCreateModal}
+                            disabled={creating}
                             className="w-full sm:w-auto px-6 py-2 bg-[#313135BA] text-[#DEDEE3] hover:bg-[#404044] border-none"
                         >
                             Cancel
@@ -549,10 +600,10 @@ const CampaignsPage = () => {
                         <Button
                             variant="secondary"
                             onClick={handleCreateCampaign}
-                            disabled={!campaignFormData.campaignName.trim() || !campaignFormData.targetSegment}
+                            disabled={creating || !campaignFormData.campaignName.trim() || !campaignFormData.targetSegment || !campaignFormData.messageBody.trim()}
                             className="w-full sm:w-auto px-6 py-2 bg-[#00FFB3] text-black hover:bg-[#00FFB3]/90 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Create Campaign
+                            {creating ? 'Creating...' : 'Create Campaign'}
                         </Button>
                     </div>
                 </div>

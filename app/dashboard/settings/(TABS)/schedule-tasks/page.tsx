@@ -1,11 +1,31 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataTable, TableColumn } from '@/components/ui/table';
 import { Button } from '@/components/ui/button/button';
 import { Select } from '@/components/ui/select';
 import { TimePicker } from '@/components/ui/calendar/time-picker';
+import api from '@/lib/api';
+
+interface Task {
+    id: number;
+    key: string;
+    name: string;
+    frequency: string;
+    run_time: string;
+    timezone: string;
+    status: string;
+    next_run: string;
+    last_run_at: string | null;
+    avg_duration_seconds: number;
+    created_at: string;
+    updated_at: string;
+}
 
 const ScheduleTasksPage = () => {
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
     const [schedules, setSchedules] = useState({
         boostPayout: {
             frequency: 'daily',
@@ -21,45 +41,79 @@ const ScheduleTasksPage = () => {
         }
     });
 
-    // Mock data for task queue
-    const taskQueueData = [
-        {
-            id: '1',
-            taskName: 'Boost Payout Processing',
-            nextRun: '2025-01-18 09:00',
-            kycStatus: 'Idle',
-            lastRun: '2025-01-18 06:00',
-            avgDuration: '12m 34s',
-            actions: 'Play/Stop'
-        },
-        {
-            id: '2',
-            taskName: 'Interest Crediting',
-            nextRun: '2025-01-18 00:30',
-            kycStatus: 'Queued',
-            lastRun: '2025-01-18 00:30',
-            avgDuration: '8m 15s',
-            actions: 'Play/Stop'
-        },
-        {
-            id: '3',
-            taskName: 'Inactivity Notifications',
-            nextRun: '2025-01-18 00:30',
-            kycStatus: 'Idle',
-            lastRun: '2025-01-18 12:15',
-            avgDuration: '3m 42s',
-            actions: 'Play/Stop'
-        },
-        {
-            id: '4',
-            taskName: 'Data Backup',
-            nextRun: '2025-01-18 00:30',
-            kycStatus: 'Running',
-            lastRun: '2025-01-18 18:45',
-            avgDuration: '45m 18s',
-            actions: 'Play/Stop'
-        }
-    ];
+    // Fetch tasks from API
+    useEffect(() => {
+        const fetchTasks = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get<Task[]>('/tasks');
+                setTasks(response.data);
+                
+                // Update schedule configuration based on API data
+                response.data.forEach(task => {
+                    const time = task.run_time.substring(0, 5); // Extract HH:MM from HH:MM:SS
+                    
+                    if (task.key === 'boost_payout') {
+                        setSchedules(prev => ({
+                            ...prev,
+                            boostPayout: {
+                                frequency: task.frequency,
+                                time: time
+                            }
+                        }));
+                    } else if (task.key === 'interest_crediting') {
+                        setSchedules(prev => ({
+                            ...prev,
+                            interestCrediting: {
+                                frequency: task.frequency,
+                                time: time
+                            }
+                        }));
+                    } else if (task.key === 'inactivity_notifications') {
+                        setSchedules(prev => ({
+                            ...prev,
+                            inactivityNotifications: {
+                                frequency: task.frequency,
+                                time: time
+                            }
+                        }));
+                    }
+                });
+            
+                console.log('Fetched tasks:', response.data);
+                setError(null);
+            } catch (err: any) {
+                console.error('Error fetching tasks:', err);
+                setError(err.message || 'Failed to fetch tasks');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTasks();
+    }, []);
+
+    // Helper function to format duration from seconds
+    const formatDuration = (seconds: number): string => {
+        if (seconds === 0) return 'N/A';
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}m ${remainingSeconds}s`;
+    };
+
+    // Helper function to format date
+    const formatDate = (dateString: string | null): string => {
+        if (!dateString) return 'Never';
+        const date = new Date(dateString);
+        return date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    };
 
     // Mock data for job history
     const jobHistoryData = [
@@ -95,35 +149,36 @@ const ScheduleTasksPage = () => {
         }
     ];
 
-    const taskQueueColumns: TableColumn[] = [
+    const taskQueueColumns: TableColumn<Task>[] = [
         {
-            key: 'taskName',
+            key: 'name',
             header: 'TASK NAME',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#DEDEE3] font-medium">{row.taskName}</span>
+            render: (value: any, row: Task) => (
+                <span className="text-[#DEDEE3] font-medium">{row.name}</span>
             )
         },
         {
-            key: 'nextRun',
+            key: 'next_run',
             header: 'NEXT RUN',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#DEDEE3]">{row.nextRun}</span>
+            render: (value: any, row: Task) => (
+                <span className="text-[#DEDEE3]">{formatDate(row.next_run)}</span>
             )
         },
         {
-            key: 'kycStatus',
-            header: 'KYC STATUS',
+            key: 'status',
+            header: 'STATUS',
             sortable: true,
-            render: (value: string, row: any) => {
+            render: (value: string, row: Task) => {
+                const status = row.status || 'idle';
                 const getStatusColor = (status: string) => {
-                    switch (status) {
-                        case 'Idle':
+                    switch (status.toLowerCase()) {
+                        case 'idle':
                             return 'text-gray-400';
-                        case 'Queued':
+                        case 'queued':
                             return 'text-yellow-400';
-                        case 'Running':
+                        case 'running':
                             return 'text-green-400';
                         default:
                             return 'text-gray-400';
@@ -131,12 +186,12 @@ const ScheduleTasksPage = () => {
                 };
 
                 const getStatusDot = (status: string) => {
-                    switch (status) {
-                        case 'Idle':
+                    switch (status.toLowerCase()) {
+                        case 'idle':
                             return 'bg-gray-400';
-                        case 'Queued':
+                        case 'queued':
                             return 'bg-yellow-400';
-                        case 'Running':
+                        case 'running':
                             return 'bg-green-400';
                         default:
                             return 'bg-gray-400';
@@ -145,28 +200,28 @@ const ScheduleTasksPage = () => {
 
                 return (
                     <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${getStatusDot(row.kycStatus)}`}></div>
-                        <span className={`font-medium ${getStatusColor(row.kycStatus)}`}>
-                            {row.kycStatus}
+                        <div className={`w-2 h-2 rounded-full ${getStatusDot(status)}`}></div>
+                        <span className={`font-medium capitalize ${getStatusColor(status)}`}>
+                            {status}
                         </span>
                     </div>
                 );
             }
         },
         {
-            key: 'lastRun',
+            key: 'last_run_at',
             header: 'LAST RUN',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#8C8C93]">{row.lastRun}</span>
+            render: (value: any, row: Task) => (
+                <span className="text-[#8C8C93]">{formatDate(row.last_run_at)}</span>
             )
         },
         {
-            key: 'avgDuration',
+            key: 'avg_duration_seconds',
             header: 'AVG DURATION',
             sortable: true,
-            render: (value: any, row: any) => (
-                <span className="text-[#DEDEE3]">{row.avgDuration}</span>
+            render: (value: any, row: Task) => (
+                <span className="text-[#DEDEE3]">{formatDuration(row.avg_duration_seconds)}</span>
             )
         },
         {
@@ -218,38 +273,47 @@ const ScheduleTasksPage = () => {
         },
         {
             key: 'endedAt',
-            header: 'STARTED AT',
+            header: 'ENDED AT',
             sortable: true,
             render: (value: any, row: any) => (
                 <span className="text-[#8C8C93]">{row.endedAt}</span>
             )
         },
         {
-            key: 'kycStatus',
-            header: 'KYC STATUS',
+            key: 'status',
+            header: 'STATUS',
             sortable: true,
             render: (value: string, row: any) => {
+                const status = row.status || row.kycStatus || 'idle';
                 const getStatusColor = (status: string) => {
-                    switch (status) {
-                        case 'Idle':
+                    switch (status.toLowerCase()) {
+                        case 'idle':
                             return 'text-gray-400';
-                        case 'Queued':
+                        case 'queued':
                             return 'text-yellow-400';
-                        case 'Running':
+                        case 'running':
                             return 'text-green-400';
+                        case 'completed':
+                            return 'text-blue-400';
+                        case 'failed':
+                            return 'text-red-400';
                         default:
                             return 'text-gray-400';
                     }
                 };
 
                 const getStatusDot = (status: string) => {
-                    switch (status) {
-                        case 'Idle':
+                    switch (status.toLowerCase()) {
+                        case 'idle':
                             return 'bg-gray-400';
-                        case 'Queued':
+                        case 'queued':
                             return 'bg-yellow-400';
-                        case 'Running':
+                        case 'running':
                             return 'bg-green-400';
+                        case 'completed':
+                            return 'bg-blue-400';
+                        case 'failed':
+                            return 'bg-red-400';
                         default:
                             return 'bg-gray-400';
                     }
@@ -257,9 +321,9 @@ const ScheduleTasksPage = () => {
 
                 return (
                     <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${getStatusDot(row.kycStatus)}`}></div>
-                        <span className={`font-medium ${getStatusColor(row.kycStatus)}`}>
-                            {row.kycStatus}
+                        <div className={`w-2 h-2 rounded-full ${getStatusDot(status)}`}></div>
+                        <span className={`font-medium capitalize ${getStatusColor(status)}`}>
+                            {status}
                         </span>
                     </div>
                 );
@@ -293,7 +357,8 @@ const ScheduleTasksPage = () => {
         { value: 'monthly', label: 'Monthly' }
     ];
 
-    const handleScheduleChange = (scheduleType: string, field: string, value: string) => {
+    const handleScheduleChange = async (scheduleType: string, field: string, value: string) => {
+        // Update local state immediately
         setSchedules(prev => ({
             ...prev,
             [scheduleType]: {
@@ -301,12 +366,64 @@ const ScheduleTasksPage = () => {
                 [field]: value
             }
         }));
+
+        // Map schedule type to task key
+        const taskKeyMap: Record<string, string> = {
+            'boostPayout': 'boost_payout',
+            'interestCrediting': 'interest_crediting',
+            'inactivityNotifications': 'inactivity_notifications'
+        };
+
+        const taskKey = taskKeyMap[scheduleType];
+        if (!taskKey) return;
+
+        // Get current schedule values
+        const currentSchedule = {
+            ...schedules[scheduleType as keyof typeof schedules],
+            [field]: value
+        };
+
+        // Prepare payload
+        const payload = {
+            frequency: currentSchedule.frequency,
+            run_time: `${currentSchedule.time}:00`, // Convert HH:MM to HH:MM:SS
+            timezone: 'Africa/Lagos'
+        };
+
+        try {
+            await api.put(`/tasks/${taskKey}/schedule`, payload);
+            console.log(`Updated schedule for ${taskKey}:`, payload);
+            
+            // Optionally refresh tasks to get updated data
+            const response = await api.get<Task[]>('/tasks');
+            setTasks(response.data);
+        } catch (err: any) {
+            console.error(`Error updating schedule for ${taskKey}:`, err);
+            setError(err.message || 'Failed to update schedule');
+        }
     };
 
     return (
         <div className="space-y-8 max-w-6xl">
-            {/* Schedule Configuration Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 md:gap-20 gap-5 max-w-4xl">
+            {/* Loading State */}
+            {loading && (
+                <div className="flex items-center justify-center p-8">
+                    <div className="text-[#8C8C93]">Loading tasks...</div>
+                </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                    <p className="text-red-400">{error}</p>
+                </div>
+            )}
+
+            {/* Content - Only show when not loading */}
+            {!loading && (
+                <>
+                    {/* Schedule Configuration Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 md:gap-20 gap-5 max-w-4xl">
                 {/* Boost Payout Schedule */}
                 <div className="space-y-4">
                     <div>
@@ -399,7 +516,7 @@ const ScheduleTasksPage = () => {
                 </div>
                 <div className="bg-[#1C1C1E] border border-[#313135BA] rounded-xl p-6">
                     <DataTable
-                        data={taskQueueData}
+                        data={tasks}
                         columns={taskQueueColumns}
                         variant="dark"
                         className="border-none"
@@ -424,6 +541,8 @@ const ScheduleTasksPage = () => {
                     />
                 </div>
             </div>
+                </>
+            )}
         </div>
     );
 };
